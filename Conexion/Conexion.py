@@ -1,9 +1,6 @@
 import mysql.connector
 from mysql.connector import Error
 
-import mysql.connector
-from mysql.connector import Error
-
 def conexionBD():
     try:
         connection = mysql.connector.connect(

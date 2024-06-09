@@ -1,6 +1,28 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
-from datetime import date
+
+def listarProductos():
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return []
+    
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM producto")  # Consulta para seleccionar todos los productos
+        productos = cursor.fetchall()  # Recupera todos los registros de la consulta
+        
+        return productos
+
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo listar los productos: {e}")
+        return []
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+
 
 def guardarProducto(producto):
     conexion = conexionBD()

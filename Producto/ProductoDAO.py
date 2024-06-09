@@ -1,6 +1,82 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+def listarCondiciones(where):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return []
+    
+    listarProductos = []
+    sql = f'SELECT * FROM Producto {where}'
+
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)  
+        listarProductos = cursor.fetchall()  # Obtener todos los resultados de la consulta
+        conexion.commit()  
+
+    except Exception as e:
+        messagebox.showerror('Error', f'Error al listar productos: {e}')
+    
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return listarProductos  # Devolver los resultados de la consulta
+
+
+
+def eliminarProducto(idProducto):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return
+    sql = f"""DELETE FROM Producto WHERE idProducto = {idProducto}"""
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
+        conexion.commit()  # Asegura que los cambios se guarden en la base de datos
+        title = 'Eliminar Producto'  
+        mensaje = 'Producto Eliminado Exitosamente'  
+        messagebox.showinfo(title, mensaje) 
+
+    except Exception as e:
+        title = 'Eliminar Producto'
+        mensaje = f'Error al Eliminar el Producto: {e}'
+        messagebox.showinfo(title, mensaje)
+    
+    finally:
+        cursor.close()
+        conexion.close()
+
+def editarProducto(producto, idProducto):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return
+    
+    sql = f"""UPDATE Producto SET  tipoProducto = '{producto.tipoProducto}', nombre = '{producto.nombre}', cantidadStock = {producto.cantidadStock}, 
+            precio = {producto.precio}, fechaIngreso = '{producto.fechaIngreso}' WHERE idProducto = {idProducto}"""
+    
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
+        conexion.commit()  # Asegura que los cambios se guarden en la base de datos
+        title = 'Editar Producto'  
+        mensaje = 'Producto Editado Exitosamente'  
+        messagebox.showinfo(title, mensaje) 
+
+    except Exception as e:
+        title = 'Editar Producto'
+        mensaje = f'Error al Editar el Producto: {e}'
+        messagebox.showinfo(title, mensaje)
+    
+    finally:
+        cursor.close()
+        conexion.close() 
+
+
 def listarProductos():
     conexion = conexionBD()
     if conexion is None:
@@ -23,15 +99,14 @@ def listarProductos():
         conexion.close()
 
 
-
 def guardarProducto(producto):
     conexion = conexionBD()
     if conexion is None:
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
-    sql = f"""INSERT INTO producto (idProducto, tipoProducto, nombre, cantidadStock, precio, fechaIngreso) VALUES
-            ({producto.idProducto}, '{producto.tipoProducto}', '{producto.nombre}', {producto.cantidadStock}, {producto.precio}, '{producto.fechaIngreso}')"""
+    sql = f"""INSERT INTO producto (codigo, tipoProducto, nombre, cantidadStock, precio, fechaIngreso) VALUES
+            ({producto.codigo}, '{producto.tipoProducto}', '{producto.nombre}', {producto.cantidadStock}, {producto.precio}, '{producto.fechaIngreso}')"""
     
     try:
         cursor = conexion.cursor()
@@ -50,9 +125,11 @@ def guardarProducto(producto):
         cursor.close()
         conexion.close()    
 
+
 class Producto:
-        def __init__(self, idProducto, tipoProducto, nombre, cantidadStock, precio, fechaIngreso):
-            self.idProducto = idProducto
+        def __init__(self, codigo, tipoProducto, nombre, cantidadStock, precio, fechaIngreso):
+            self.idProducto = None
+            self.codigo = codigo
             self.tipoProducto = tipoProducto
             self.nombre = nombre
             self.cantidadStock = cantidadStock
@@ -64,10 +141,3 @@ class Producto:
                 f"Stock: {self.cantidadStock}, Precio: {self.precio}, Fecha de Ingreso: {self.fechaIngreso}]")
 
 
-
-# Comprobar inserccion 
-"""if __name__ == "__main__":
-    
-    # Crear una instancia de Producto
-    nuevo_producto = Producto(100122, 'Electrónica', 'Laptop', 10.0, 750.00, date.today())
-    guardarProducto(nuevo_producto)"""

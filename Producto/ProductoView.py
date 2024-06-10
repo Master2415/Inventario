@@ -1,10 +1,9 @@
 import tkinter as tk
-import tkcalendar as tc
 from tkinter import *
 from tkinter import messagebox
-from tkinter import ttk, Toplevel
+from tkinter import ttk
 from tkcalendar import *
-from datetime import datetime, date
+from datetime import datetime
 from Producto.ProductoDAO import *
 
 
@@ -221,8 +220,6 @@ class Frame_Producto(tk.Frame):
             self.listaProductos = listarCondiciones(where)
         else:
             self.listaProductos = listarProductos()
-        
-        self.listaProductos = listarProductos()
 
         # Frame para la tabla y la barra de desplazamiento
         frame_tabla = tk.Frame(self)

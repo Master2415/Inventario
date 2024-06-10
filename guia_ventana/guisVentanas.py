@@ -1,5 +1,6 @@
 import tkinter as tk
 from Producto.ProductoView import Frame_Producto
+from Cliente.ClienteView import Frame_Cliente
 
 class Aplicacion(tk.Tk):
     def __init__(self):
@@ -20,7 +21,7 @@ class Aplicacion(tk.Tk):
         self.btnAgregarHistoria = tk.Button(self.frame_sidebar, text="Productos", command=self.mostrarProductos)
         self.btnAgregarHistoria.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnAgregarHistoria.pack(fill='x', pady=5, padx=5)
-
+    
         self.btnOtraOpcion = tk.Button(self.frame_sidebar, text="Clientes", command=self.mostrarClientes)
         self.btnOtraOpcion.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnOtraOpcion.pack(fill='x', pady=5, padx=5)
@@ -44,6 +45,10 @@ class Aplicacion(tk.Tk):
         # Limpiar el contenido anterior del marco principal
         for widget in self.frame_main.winfo_children():
             widget.destroy()
+        
+         # Mostrar la vista de productos en el marco principal
+        frame_producto = Frame_Cliente(self.frame_main, width=1080, height=720)
+        frame_producto.pack(fill='both', expand=True)
     
     def salir(self):
         self.destroy()

@@ -4,7 +4,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkcalendar import *
 from datetime import datetime
-from Producto.ProductoDAO import *
+from Model.ProductoDAO import *
 
 
 class Frame_Producto(tk.Frame):
@@ -22,15 +22,15 @@ class Frame_Producto(tk.Frame):
 
     def lebels_Entrys(self):
         #LABELS
-        self.lblcodigo = tk.Label(self, text='Codigo: ')
+        self.lblcodigo = tk.Label(self, text='Codigo')
         self.lblcodigo.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblcodigo.grid(column=0, row=0, padx=10, pady=5)
 
-        self.lblNombre = tk.Label(self, text='Nombre: ')
+        self.lblNombre = tk.Label(self, text='Nombre')
         self.lblNombre.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblNombre.grid(column=0, row=1, padx=10, pady=5)
 
-        self.lbltipo = tk.Label(self, text='Tipo: ')
+        self.lbltipo = tk.Label(self, text='Tipo')
         self.lbltipo.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lbltipo.grid(column=0, row=2, padx=10, pady=5)
 
@@ -38,11 +38,11 @@ class Frame_Producto(tk.Frame):
         self.lblcantidad.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblcantidad.grid(column=0, row=3, padx=10, pady=5)
 
-        self.lblprecio = tk.Label(self, text='Precio: ')
+        self.lblprecio = tk.Label(self, text='Precio')
         self.lblprecio.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblprecio.grid(column=0, row=4, padx=10, pady=5)
 
-        self.lblfecha = tk.Label(self, text='Fecha: ')
+        self.lblfecha = tk.Label(self, text='Fecha')
         self.lblfecha.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblfecha.grid(column=0, row=5, padx=10, pady=5)
 
@@ -176,7 +176,7 @@ class Frame_Producto(tk.Frame):
             self.precio                     = self.tabla.item(self.tabla.selection())['values'][4]
             self.fecha                      = self.tabla.item(self.tabla.selection())['values'][5]
             
-            self.habilitar()
+            self.habilitarEditar()
 
             # Se agregan los datos obtenidos en el entry
             self.entryCodigo.insert(0, self.codigo)
@@ -190,6 +190,24 @@ class Frame_Producto(tk.Frame):
             title = 'Editar Producto'
             mensaje = 'Error al editar Producto'
             messagebox.showerror(title, mensaje)
+
+    def habilitarEditar(self):
+        self.svCodigo.set('')
+        self.svTipo.set('')
+        self.svNombre.set('')
+        self.svCantidad.set('')
+        self.svPrecio.set('')
+        self.svFecha.set('')
+
+        self.entryCodigo.config(state='normal')
+        self.entryTipo.config(state='normal')
+        self.entryNombre.config(state='normal')
+        self.entryCantidad.config(state='normal')
+        self.entryPrecio.config(state='normal')
+        self.entryFecha.config(state='normal')
+
+        self.btnGuardar.config(state='normal')
+        self.btnCancelar.config(state='normal') 
     
     def habilitar(self):
         self.svCodigo.set('')

@@ -1,30 +1,67 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+def eliminarPersona(idPersona):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return
+    sql = f"""UPDATE Persona SET Status = 0 WHERE id = {idPersona}"""
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
+        conexion.commit()  # Asegura que los cambios se guarden en la base de datos
+        title = 'Eliminar Persona'  
+        mensaje = 'Persona Eliminado Exitosamente'  
+        messagebox.showinfo(title, mensaje) 
+
+    except Exception as e:
+        title = 'Eliminar Persona'
+        mensaje = f'Error al Eliminar el Persona: {e}'
+        messagebox.showinfo(title, mensaje)
+    
+    finally:
+        cursor.close()
+        conexion.close()
+
 def editarCliente(cliente, idCliente):
     conexion = conexionBD()
     if conexion is None:
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
-    sql = f""" consulta para editar """
+    # SQL para actualizar en la tabla Persona
+    sql_persona = f"""UPDATE Persona SET
+                        cedula = {cliente.cedula},
+                        nombre = '{cliente.nombre}',
+                        apellido = '{cliente.apellido}',
+                        direccion = '{cliente.direccion}',
+                        correo = '{cliente.correo}',
+                        telefono_numero = '{cliente.telefono_numero}',
+                        ciudad = '{cliente.ciudad}', Status = 1
+                    WHERE id = {idCliente}"""
+    
+    # SQL para actualizar en la tabla Cliente
+    sql_cliente = f"""UPDATE Cliente SET
+                        tipo_cliente = '{cliente.tipo_cliente}'
+                    WHERE id = {idCliente}"""
     
     try:
         cursor = conexion.cursor()
-        cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
-        conexion.commit()  # Asegura que los cambios se guarden en la base de datos
-        title = 'Editar Cliente'  
-        mensaje = 'Cliente Editado Exitosamente'  
-        messagebox.showinfo(title, mensaje) 
-
+        cursor.execute(sql_persona)
+        cursor.execute(sql_cliente)
+        conexion.commit()
+        title = 'Editar Cliente'
+        mensaje = 'Cliente Editado Exitosamente'
+        messagebox.showinfo(title, mensaje)
     except Exception as e:
         title = 'Editar Cliente'
         mensaje = f'Error al Editar el Cliente: {e}'
         messagebox.showinfo(title, mensaje)
-    
     finally:
         cursor.close()
-        conexion.close() 
+        conexion.close()
+
 
 def guardarCliente(cliente):
     conexion = conexionBD()
@@ -33,8 +70,8 @@ def guardarCliente(cliente):
         return
     
     # SQL para insertar en la tabla Persona
-    sql_persona = f"""INSERT INTO Persona (cedula, nombre, apellido, direccion, correo, Telefono_numero, Ciudad) VALUES
-                    ({cliente.cedula}, '{cliente.nombre}', '{cliente.apellido}', '{cliente.direccion}', '{cliente.correo}', '{cliente.Telefono_numero}', '{cliente.Ciudad}', '1')"""
+    sql_persona = f"""INSERT INTO Persona (cedula, nombre, apellido, direccion, correo, telefono_numero, ciudad, Status) VALUES
+                    ({cliente.cedula}, '{cliente.nombre}', '{cliente.apellido}', '{cliente.direccion}', '{cliente.correo}', '{cliente.telefono_numero}', '{cliente.ciudad}', 1)"""
     
     try:
         cursor = conexion.cursor()
@@ -66,7 +103,7 @@ def listarCondicion(where):
         return []
     
     listarClientes = []
-    sql = f'SELECT p.*, c.tipo_cliente FROM Persona p JOIN Cliente c ON p.id = c.id {where}'
+    sql = f'SELECT p.id, p.cedula, p.nombre, p.apellido, p.direccion, p.correo, p.Telefono_numero, p.Ciudad, c.tipo_cliente, p.Status FROM Persona p JOIN Cliente c ON p.id = c.id {where}'
 
     try:
         cursor = conexion.cursor()
@@ -92,7 +129,7 @@ def listarClientes():
     
     try:
         cursor = conexion.cursor()
-        cursor.execute("SELECT p.*, c.tipo_cliente FROM Persona p JOIN Cliente c ON p.id = c.id")  # Consulta para seleccionar todos los productos
+        cursor.execute("SELECT p.id, p.cedula, p.nombre, p.apellido, p.direccion, p.correo, p.Telefono_numero, p.Ciudad, c.tipo_cliente, p.Status FROM Persona p JOIN Cliente c ON p.id = c.id where Status = 1")  # Consulta para seleccionar todos los productos
         productos = cursor.fetchall()  # Recupera todos los registros de la consulta
         
         return productos
@@ -107,13 +144,12 @@ def listarClientes():
 
 
 class Cliente():
-    def __init__(self, cedula, nombre, apellido, direccion, correo, telefono, ciudad, tipo):
-        self.id = None
+    def __init__(self, cedula, nombre, apellido, direccion, correo, telefono_numero, ciudad, tipo_cliente):
         self.cedula = cedula
         self.nombre = nombre
         self.apellido = apellido
         self.direccion = direccion
         self.correo = correo
-        self.Telefono_numero = telefono
+        self.telefono_numero = telefono_numero
         self.ciudad = ciudad
-        self.tipo = tipo
+        self.tipo_cliente = tipo_cliente

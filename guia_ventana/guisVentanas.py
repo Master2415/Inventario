@@ -1,6 +1,6 @@
 import tkinter as tk
-from Producto.ProductoView import Frame_Producto
-from Cliente.ClienteView import Frame_Cliente
+from View.ProductoView import Frame_Producto
+from View.ClienteView import Frame_Cliente
 
 class Aplicacion(tk.Tk):
     def __init__(self):

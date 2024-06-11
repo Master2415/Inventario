@@ -4,7 +4,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkcalendar import *
 from datetime import datetime
-from Cliente.ClienteDao import *
+from Model.ClienteDao import *
 
 class Frame_Cliente(tk.Frame):
 
@@ -116,7 +116,7 @@ class Frame_Cliente(tk.Frame):
         self.btnCancelar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnCancelar.grid(column=3, row=5, padx=10, pady=5)
 
-        self.btnEliminar = tk.Button(self, text='Eliminar Cliente')
+        self.btnEliminar = tk.Button(self, text='Eliminar Cliente', command=self.eliminarPersona)
         self.btnEliminar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnEliminar.grid(column=3, row=12, padx=10, pady=5)
 
@@ -124,17 +124,29 @@ class Frame_Cliente(tk.Frame):
         self.btnBuscar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#001CCF')
         self.btnBuscar.grid(column=3, row=8, padx=10, pady=5)
 
+    def eliminarPersona(self):
+        try:
+            self.idCliente = self.tabla.item(self.tabla.selection())['text']
+            eliminarPersona(self.idCliente)
+            
+            self.tablaClientes()
+            self.idCliente = None
+        except:
+            title = 'Eliminar Cliente'
+            mensaje = 'No se pudo eliminar Cliente'
+            messagebox.showinfo(title, mensaje)
+
     def editarCliente(self):
         try:
             # Obtengo los datos
             self.idCliente                 = self.tabla.item(self.tabla.selection())['text'] #Trae el ID
-            self.cedula                     = self.tabla.item(self.tabla.selection())['values'][0]
-            self.nombre                       = self.tabla.item(self.tabla.selection())['values'][1]
-            self.apellido                     = self.tabla.item(self.tabla.selection())['values'][2]
-            self.direccion                   = self.tabla.item(self.tabla.selection())['values'][3]
-            self.correo                     = self.tabla.item(self.tabla.selection())['values'][4]
-            self.telefono                      = self.tabla.item(self.tabla.selection())['values'][5]
-            self.ciudad                      = self.tabla.item(self.tabla.selection())['values'][6]
+            self.cedula                    = self.tabla.item(self.tabla.selection())['values'][0]
+            self.nombre                    = self.tabla.item(self.tabla.selection())['values'][1]
+            self.apellido                  = self.tabla.item(self.tabla.selection())['values'][2]
+            self.direccion                 = self.tabla.item(self.tabla.selection())['values'][3]
+            self.correo                    = self.tabla.item(self.tabla.selection())['values'][4]
+            self.telefono                  = self.tabla.item(self.tabla.selection())['values'][5]
+            self.ciudad                    = self.tabla.item(self.tabla.selection())['values'][6]
             self.tipo                      = self.tabla.item(self.tabla.selection())['values'][7]
             
             self.habilitar()
@@ -148,11 +160,11 @@ class Frame_Cliente(tk.Frame):
             self.entryTelefono.insert(0, self.telefono)
             self.entryCiudad.insert(0, self.ciudad)
             self.entryTipo.insert(0, self.tipo)
-      
         except:
-            title = 'Editar Cliente'
-            mensaje = 'Error al editar Cliente'
+            title = 'Editar Producto'
+            mensaje = 'Error al editar Producto'
             messagebox.showerror(title, mensaje)
+      
 
     def ingresarCliente(self):
         cliente = Cliente(self.svCedula.get(), self.svNombre.get(), self.svApellido.get(), self.svDireccioon.get(), 
@@ -218,7 +230,8 @@ class Frame_Cliente(tk.Frame):
         # Verificar si se proporcionó algún texto de búsqueda
         if texto_busqueda:
             # Crear la condición WHERE
-            where = "WHERE cedula LIKE '%" + texto_busqueda + "%' OR nombre LIKE '%" + texto_busqueda + "%' OR Ciudad LIKE '%" + texto_busqueda + "%'"
+            where = "WHERE cedula LIKE '%" + texto_busqueda + "%' OR nombre LIKE '%" + texto_busqueda + "%' OR Ciudad LIKE '%" + texto_busqueda + "%' OR tipo_cliente LIKE '%" + texto_busqueda + "%'"
+
         else:
             where = ""  # Si no se proporcionó ninguna entrada, no se aplica ninguna condición WHERE
 
@@ -251,15 +264,17 @@ class Frame_Cliente(tk.Frame):
         self.tabla.heading('#5', text='Correo')
         self.tabla.heading('#6', text='Telefono')
         self.tabla.heading('#7', text='ciudad')
+        self.tabla.heading('#8', text='Tipo')
 
         self.tabla.column("#0", anchor='w', width=70)
-        self.tabla.column("#1", anchor='w', width=120)
-        self.tabla.column("#2", anchor='w', width=150)
-        self.tabla.column("#3", anchor='w', width=160)
+        self.tabla.column("#1", anchor='w', width=100)
+        self.tabla.column("#2", anchor='w', width=130)
+        self.tabla.column("#3", anchor='w', width=150)
         self.tabla.column("#4", anchor='w', width=150)
         self.tabla.column("#5", anchor='w', width=200)
-        self.tabla.column("#6", anchor='w', width=170)
+        self.tabla.column("#6", anchor='w', width=130)
         self.tabla.column("#7", anchor='w', width=100)
+        self.tabla.column("#8", anchor='w', width=140)
 
         for p in self.listaClientes:
-            self.tabla.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7]), tags=('evenrow',))
+            self.tabla.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]), tags=('evenrow',))

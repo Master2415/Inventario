@@ -16,7 +16,7 @@ class Frame_Cliente(tk.Frame):
         self.idCliente = None # Usado para acceder a los metodos
         self.lebels_Entrys()
         self.tablaClientes()
-        #self.deshabilitar()
+        self.desHabilitar()
         
 
     def lebels_Entrys(self):
@@ -100,19 +100,19 @@ class Frame_Cliente(tk.Frame):
         self.entryBuscar.grid(column=1, row=8, padx=10, pady=5, columnspan=2)
 
         #Botones
-        self.btnNuevo = tk.Button(self, text='Agregar Cliente')
+        self.btnNuevo = tk.Button(self, text='Agregar Cliente', command=self.habilitar)
         self.btnNuevo.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#158645')
         self.btnNuevo.grid(column=3, row=0, padx=10, pady=5)
 
-        self.btnGuardar = tk.Button(self, text='Guardar Nuevo')
+        self.btnGuardar = tk.Button(self, text='Guardar Nuevo', command=self.ingresarCliente)
         self.btnGuardar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#158645')
         self.btnGuardar.grid(column=3, row=1, padx=10, pady=5)
 
-        self.btnEditar = tk.Button(self, text='Editar Cliente')
+        self.btnEditar = tk.Button(self, text='Editar Cliente', command=self.editarCliente)
         self.btnEditar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#158645')
         self.btnEditar.grid(column=3, row=2, padx=10, pady=5)
 
-        self.btnCancelar = tk.Button(self, text='Cancelar Nuevo')
+        self.btnCancelar = tk.Button(self, text='Cancelar Nuevo', command=self.desHabilitar)
         self.btnCancelar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnCancelar.grid(column=3, row=5, padx=10, pady=5)
 
@@ -123,6 +123,93 @@ class Frame_Cliente(tk.Frame):
         self.btnBuscar = tk.Button(self, text='Buscar', command=self.buscarCliente)
         self.btnBuscar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#001CCF')
         self.btnBuscar.grid(column=3, row=8, padx=10, pady=5)
+
+    def editarCliente(self):
+        try:
+            # Obtengo los datos
+            self.idCliente                 = self.tabla.item(self.tabla.selection())['text'] #Trae el ID
+            self.cedula                     = self.tabla.item(self.tabla.selection())['values'][0]
+            self.nombre                       = self.tabla.item(self.tabla.selection())['values'][1]
+            self.apellido                     = self.tabla.item(self.tabla.selection())['values'][2]
+            self.direccion                   = self.tabla.item(self.tabla.selection())['values'][3]
+            self.correo                     = self.tabla.item(self.tabla.selection())['values'][4]
+            self.telefono                      = self.tabla.item(self.tabla.selection())['values'][5]
+            self.ciudad                      = self.tabla.item(self.tabla.selection())['values'][6]
+            self.tipo                      = self.tabla.item(self.tabla.selection())['values'][7]
+            
+            self.habilitar()
+
+            # Se agregan los datos obtenidos en el entry
+            self.entruCedula.insert(0, self.cedula)
+            self.entryNombre.insert(0, self.nombre)
+            self.entryApellido.insert(0, self.apellido)
+            self.entryDireccion.insert(0, self.direccion)
+            self.entryCorreo.insert(0, self.correo)
+            self.entryTelefono.insert(0, self.telefono)
+            self.entryCiudad.insert(0, self.ciudad)
+            self.entryTipo.insert(0, self.tipo)
+      
+        except:
+            title = 'Editar Cliente'
+            mensaje = 'Error al editar Cliente'
+            messagebox.showerror(title, mensaje)
+
+    def ingresarCliente(self):
+        cliente = Cliente(self.svCedula.get(), self.svNombre.get(), self.svApellido.get(), self.svDireccioon.get(), 
+                          self.svcorreo.get(), self.svTelefono.get(), self.svCiudad.get(), self.svTipo.get())
+
+        if self.idCliente == None:
+            guardarCliente(cliente)
+        else:
+            editarCliente(cliente, self.idCliente)
+
+        self.desHabilitar() # Luego de guardar se desactivan los entrys, obligando al usuario a dar click en nuevo
+        self.tablaClientes() # Se refresca la tabla de los clientes
+
+    def habilitar(self):
+        self.svCedula.set('')
+        self.svNombre.set('')
+        self.svApellido.set('')
+        self.svDireccioon.set('')
+        self.svcorreo.set('')
+        self.svTelefono.set('')
+        self.svCiudad.set('')
+        self.svTipo.set('')
+
+        self.entruCedula.config(state='normal')
+        self.entryNombre.config(state='normal')
+        self.entryApellido.config(state='normal')
+        self.entryDireccion.config(state='normal')
+        self.entryCorreo.config(state='normal')
+        self.entryTelefono.config(state='normal')
+        self.entryCiudad.config(state='normal')
+        self.entryTipo.config(state='normal')
+
+        self.btnGuardar.config(state='normal')
+        self.btnCancelar.config(state='normal')
+
+    def desHabilitar(self):
+        self.idCliente = None
+        self.svCedula.set('')
+        self.svNombre.set('')
+        self.svApellido.set('')
+        self.svDireccioon.set('')
+        self.svcorreo.set('')
+        self.svTelefono.set('')
+        self.svCiudad.set('')
+        self.svTipo.set('')
+
+        self.entruCedula.config(state='disabled')
+        self.entryNombre.config(state='disabled')
+        self.entryApellido.config(state='disabled')
+        self.entryDireccion.config(state='disabled')
+        self.entryCorreo.config(state='disabled')
+        self.entryTelefono.config(state='disabled')
+        self.entryCiudad.config(state='disabled')
+        self.entryTipo.config(state='disabled')
+
+        self.btnGuardar.config(state='disabled')
+        self.btnCancelar.config(state='disabled')  
 
     def buscarCliente(self):
         # Obtener el texto del Entry

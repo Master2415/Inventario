@@ -1,4 +1,0 @@
--- Se muestran lo cliente con todos sus datos.
-SELECT p.*, c.tipo_cliente
-FROM Persona p
-JOIN Cliente c ON p.id = c.id;

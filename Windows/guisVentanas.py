@@ -40,7 +40,7 @@ class Aplicacion(tk.Tk):
         # Mostrar la vista de productos en el marco principal
         frame_producto = Frame_Producto(self.frame_main, width=1080, height=720)
         frame_producto.pack(fill='both', expand=True)
-
+    
     def mostrarClientes(self):
         # Limpiar el contenido anterior del marco principal
         for widget in self.frame_main.winfo_children():
@@ -49,6 +49,13 @@ class Aplicacion(tk.Tk):
          # Mostrar la vista de productos en el marco principal
         frame_producto = Frame_Cliente(self.frame_main, width=1080, height=720)
         frame_producto.pack(fill='both', expand=True)
+    
+    def mostrarProveedores(self):
+        # Limpiar el contenido anterior del marco principal
+        for widget in self.frame_main.winfo_children():
+            widget.destroy()
+        
+        
     
     def salir(self):
         self.destroy()

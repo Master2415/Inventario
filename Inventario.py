@@ -1,5 +1,5 @@
 import tkinter as tk
-from guia_ventana.guisVentanas import Aplicacion
+from Windows.guisVentanas import Aplicacion
 
 def main():
     app = Aplicacion()

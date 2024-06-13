@@ -5,6 +5,7 @@ from tkinter import ttk
 from tkcalendar import *
 from datetime import datetime
 from Model.ProductoDAO import *
+from Model.ProveedorDAO import *
 
 
 class Frame_Producto(tk.Frame):
@@ -15,6 +16,7 @@ class Frame_Producto(tk.Frame):
         self.config(bg='#BBBBBB')  # Establecer el color de fondo del frame principal
         self.pack(fill='both', expand=True)
         self.idProducto = None # Usado para acceder a los metodos
+        self.idProductoProveedor = None
         self.lebels_Entrys()
         self.tablaProductos()
         self.deshabilitar()
@@ -93,19 +95,88 @@ class Frame_Producto(tk.Frame):
 
         self.btnEditar = tk.Button(self, text='Editar Producto', command=self.editarProducto)
         self.btnEditar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#158645')
-        self.btnEditar.grid(column=3, row=2, padx=10, pady=5)
+        self.btnEditar.grid(column=3, row=4, padx=10, pady=5)
 
         self.btnCancelar = tk.Button(self, text='Cancelar Nuevo', command=self.deshabilitar)
         self.btnCancelar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
-        self.btnCancelar.grid(column=3, row=5, padx=10, pady=5)
+        self.btnCancelar.grid(column=3, row=2, padx=10, pady=5)
 
         self.btnEliminar = tk.Button(self, text='Eliminar Produto', command=self.eliminarProductoView)
         self.btnEliminar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnEliminar.grid(column=3, row=12, padx=10, pady=5)
 
+        self.btnProveedor = tk.Button(self, text='Proveedor', command=self.verProveedor)
+        self.btnProveedor.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
+        self.btnProveedor.grid(column=3, row=5, padx=10, pady=5)
+
         self.btnBuscar = tk.Button(self, text='Buscar', command=self.buscarProducto)
         self.btnBuscar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#001CCF')
         self.btnBuscar.grid(column=3, row=6, padx=10, pady=5)
+
+    def verProveedor(self):
+        try:
+            if self.idProducto is None:
+                self.idProducto = self.tabla.item(self.tabla.selection())['text']
+            if self.idProducto > 0:
+                idProducto = self.idProducto
+            
+            self.windowProveedor = Toplevel()
+            self.windowProveedor.title('Proveedor del producto')
+            self.windowProveedor.resizable(0, 0)
+            self.windowProveedor.config(bg='#CDD8FF')
+
+            self.listaProveedores = listarProveedoresID(idProducto)
+            self.tablaProveedores = ttk.Treeview(self.windowProveedor, columns=('ID', 'Empresa', 'Tipo', 'Telefono', 'Dirección', 'Correo'))
+            self.tablaProveedores.grid(row=0, column=0, columnspan=7, sticky='nsew')
+
+            self.scrollProveedor = ttk.Scrollbar(self.windowProveedor, orient='vertical', command=self.tablaProveedores.yview)
+            self.scrollProveedor.grid(row=0, column=8, sticky='ns')
+
+            self.tablaProveedores.configure(yscrollcommand=self.scrollProveedor.set)
+            self.tablaProveedores.tag_configure('evenrow', background='#D7D7D7')
+
+            self.tablaProveedores.heading('#0', text='ID')
+            self.tablaProveedores.heading('#1', text='Empresa')
+            self.tablaProveedores.heading('#2', text='Tipo')
+            self.tablaProveedores.heading('#3', text='Telefono')
+            self.tablaProveedores.heading('#4', text='Dirección')
+            self.tablaProveedores.heading('#5', text='Correo')
+
+            self.tablaProveedores.column('#0', anchor=tk.W, width=50)
+            self.tablaProveedores.column('#1', anchor=tk.W, width=250)
+            self.tablaProveedores.column('#2', anchor=tk.W, width=150)
+            self.tablaProveedores.column('#3', anchor=tk.W, width=170)
+            self.tablaProveedores.column('#4', anchor=tk.W, width=250)
+            self.tablaProveedores.column('#5', anchor=tk.W, width=200)
+
+            for i, p in enumerate(self.listaProveedores):
+                self.tablaProveedores.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5]), tags=('evenrow',) if i % 2 == 0 else ())
+
+            self.btnGuardarProveedor = tk.Button(self.windowProveedor, text='Agregar Proveedor')
+            self.btnGuardarProveedor.config(width=20, font=('ARIAL', 12, 'bold'), fg='#DAD5D6', bg='#002771', cursor='hand2', activebackground='#7198E0')
+            self.btnGuardarProveedor.grid(row=2, column=0, padx=10, pady=5)
+
+            self.btnEditarProveedor = tk.Button(self.windowProveedor, text='Editar')
+            self.btnEditarProveedor.config(width=20, font=('ARIAL', 12, 'bold'), fg='#DAD5D6', bg='#3A005D', cursor='hand2', activebackground='#B47CD6')
+            self.btnEditarProveedor.grid(row=2, column=1, padx=10, pady=5)
+
+            self.btnEliminarProveedor = tk.Button(self.windowProveedor, text='Eliminar')
+            self.btnEliminarProveedor.config(width=20, font=('ARIAL', 12, 'bold'), fg='#DAD5D6', bg='#890011', cursor='hand2', activebackground='#DB939C')
+            self.btnEliminarProveedor.grid(row=2, column=2, padx=10, pady=5)
+
+            self.btnSalirWindowP = tk.Button(self.windowProveedor, text='Salir', command=self.salirTop)
+            self.btnSalirWindowP.config(width=20, font=('ARIAL', 12, 'bold'), fg='#DAD5D6', bg='#000000', cursor='hand2', activebackground='#6F6F6F')
+            self.btnSalirWindowP.grid(row=2, column=6, padx=10, pady=5)
+
+            self.idProducto = None
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo mostrar el proveedor: {e}")
+            self.idProducto = None
+
+    def salirTop(self):
+        self.windowProveedor.destroy()
+
 
     def buscarProducto(self):
         # Obtener el texto del Entry

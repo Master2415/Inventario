@@ -1,6 +1,7 @@
 import tkinter as tk
 from View.ProductoView import Frame_Producto
 from View.ClienteView import Frame_Cliente
+from View.ProveedorView import ProveedorView
 
 class Aplicacion(tk.Tk):
     def __init__(self):
@@ -18,13 +19,17 @@ class Aplicacion(tk.Tk):
         self.frame_main.pack(side='left', expand=True, fill='both')
 
         # Botones de la barra lateral con estilo
-        self.btnAgregarHistoria = tk.Button(self.frame_sidebar, text="Productos", command=self.mostrarProductos)
-        self.btnAgregarHistoria.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
-        self.btnAgregarHistoria.pack(fill='x', pady=5, padx=5)
+        self.btnProductos = tk.Button(self.frame_sidebar, text="Productos", command=self.mostrarProductos)
+        self.btnProductos.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
+        self.btnProductos.pack(fill='x', pady=5, padx=5)
     
-        self.btnOtraOpcion = tk.Button(self.frame_sidebar, text="Clientes", command=self.mostrarClientes)
-        self.btnOtraOpcion.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
-        self.btnOtraOpcion.pack(fill='x', pady=5, padx=5)
+        self.btnClientes = tk.Button(self.frame_sidebar, text="Clientes", command=self.mostrarClientes)
+        self.btnClientes.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
+        self.btnClientes.pack(fill='x', pady=5, padx=5)
+
+        self.btnProveedores = tk.Button(self.frame_sidebar, text="Proveedores")
+        self.btnProveedores.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
+        self.btnProveedores.pack(fill='x', pady=5, padx=5)
 
         # Botón de salir en la parte inferior de la barra lateral
         self.btnSalir = tk.Button(self.frame_sidebar, text="Salir", command=self.salir)
@@ -55,6 +60,8 @@ class Aplicacion(tk.Tk):
         for widget in self.frame_main.winfo_children():
             widget.destroy()
         
+
+
         
     
     def salir(self):

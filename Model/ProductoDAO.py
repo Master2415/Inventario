@@ -1,6 +1,16 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+def actualizar_stock_db( producto, cantidad):
+    connection = conexionBD()
+    if connection:
+        cursor = connection.cursor()
+        cursor.execute("UPDATE producto SET cantidadStock = cantidadStock + %s WHERE codigo = %s", (cantidad, producto))
+        connection.commit()
+        connection.close()
+
+
+
 def listarCondiciones(where):
     conexion = conexionBD()
     if conexion is None:
@@ -9,6 +19,30 @@ def listarCondiciones(where):
     
     listarProductos = []
     sql = f'SELECT * FROM Producto {where}'
+
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)  
+        listarProductos = cursor.fetchall()  # Obtener todos los resultados de la consulta
+        conexion.commit()  
+
+    except Exception as e:
+        messagebox.showerror('Error', f'Error al listar productos: {e}')
+    
+    finally:
+        cursor.close()
+        conexion.close()
+
+    return listarProductos  # Devolver los resultados de la consulta
+
+def listarCondiciones1(where):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return []
+    
+    listarProductos = []
+    sql = f'SELECT codigo, nombre, precio, cantidadStock FROM Producto {where}'
 
     try:
         cursor = conexion.cursor()
@@ -86,6 +120,27 @@ def listarProductos():
     try:
         cursor = conexion.cursor()
         cursor.execute("SELECT * FROM producto")  # Consulta para seleccionar todos los productos
+        productos = cursor.fetchall()  # Recupera todos los registros de la consulta
+        
+        return productos
+
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo listar los productos: {e}")
+        return []
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+def listarProductos1():
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return []
+    
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT codigo, nombre, precio, cantidadStock FROM producto")  # Consulta para seleccionar todos los productos
         productos = cursor.fetchall()  # Recupera todos los registros de la consulta
         
         return productos

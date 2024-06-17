@@ -1,6 +1,26 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+def obtener_id_por_producto(codigo):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return None
+    
+    try:
+        cursor = conexion.cursor()
+        cursor.execute("SELECT idProducto FROM producto WHERE codigo = %s", (codigo,))
+        resultado = cursor.fetchone()
+        if resultado:
+            return resultado[0]
+        else:
+            return None
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo obtener el ID: {e}")
+        return None
+    finally:
+        cursor.close()
+        conexion.close()
 
 def actualizar_stock_db(codigo, cantidad):
     connection = conexionBD()
@@ -35,7 +55,7 @@ def listarCondiciones(where):
 
     return listarProductos  # Devolver los resultados de la consulta
 
-def listarCondiciones1(where):
+def listarCondicionesTabla_Productos(where):
     conexion = conexionBD()
     if conexion is None:
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
@@ -129,7 +149,7 @@ def listarProductos():
         cursor.close()
         conexion.close()
 
-def listarProductos1():
+def listarProductos_En_Venta():
     conexion = conexionBD()
     if conexion is None:
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")

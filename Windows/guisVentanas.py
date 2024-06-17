@@ -7,7 +7,7 @@ class Aplicacion(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Sistema de Inventario")
-        self.geometry("1545x750")
+        self.geometry("1745x750")
         self.config(bg='#CDD8FF')
 
         # Crear el marco de la barra lateral

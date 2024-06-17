@@ -3,7 +3,6 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkcalendar import *
-from datetime import datetime
 from Model.ProductoDAO import *
 from Model.ProveedorDAO import *
 
@@ -19,7 +18,6 @@ class ProveedorView(tk.Toplevel):
         self.populate_providers()
         self.formulario_frame = None  # Inicializa la variable aquí
         self.idProveedor = None
-
 
     def create_widgets(self):
         self.tablaProveedores = ttk.Treeview(self, columns=('ID', 'Empresa', 'Tipo', 'Telefono', 'Dirección', 'Correo'))

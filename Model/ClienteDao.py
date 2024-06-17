@@ -1,5 +1,61 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
+import mysql.connector
+
+def obtener_id_por_cedula(cedula):
+        conexion = conexionBD()
+        if conexion is None:
+            messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+            return None
+        
+        try:
+            cursor = conexion.cursor()
+            cursor.execute("SELECT id FROM Persona WHERE cedula = %s", (cedula,))
+            resultado = cursor.fetchone()
+            if resultado:
+                return resultado[0]
+            else:
+                return None
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo obtener el ID: {e}")
+            return None
+        finally:
+            cursor.close()
+            conexion.close()
+
+def buscar_y_guardar_cedula(cedula):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return
+    
+    try:
+        cursor = conexion.cursor()
+        # Buscar si la cédula ya existe en la base de datos
+        cursor.execute("SELECT id FROM Persona WHERE cedula = %s", (cedula,))
+        resultado = cursor.fetchone()
+
+        if resultado:
+            print("Información", "La cédula ya existe en la base de datos")
+            #messagebox.showinfo("Información", "La cédula ya existe en la base de datos")
+        else:
+            # Insertar la nueva cédula en la tabla Persona
+            cursor.execute("INSERT INTO Persona (cedula, Status) VALUES (%s, 1)", (cedula,))
+            conexion.commit()
+            # Obtener el ID del nuevo registro insertado en la tabla Persona
+            persona_id = cursor.lastrowid
+            # Insertar en la tabla Cliente con tipo_cliente = "nuevo"
+            cursor.execute("INSERT INTO Cliente (id, tipo_cliente) VALUES (%s, %s)", (persona_id, "nuevo"))
+            conexion.commit()
+            #messagebox.showinfo("Éxito", "La cédula ha sido agregada a la base de datos")
+            print("Éxito", "La cédula y el tipo de cliente han sido agregados a la base de datos")
+
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo agregar el cliente: {e}")
+    finally:
+        cursor.close()
+        conexion.close()
+
 
 def eliminarPersona(idPersona):
     conexion = conexionBD()

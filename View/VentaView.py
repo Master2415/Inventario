@@ -1,7 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
+from datetime import datetime
+from View.DetalleVentaView import *
 from Model.ProductoDAO import *
 from Model.VentaDAO import *
+from Model.ClienteDao import buscar_y_guardar_cedula, obtener_id_por_cedula
 
 class Frame_Venta(tk.Frame):
     def __init__(self, root, width=1450, height=720):
@@ -34,11 +37,26 @@ class Frame_Venta(tk.Frame):
         self.boton_añadir_carrito = tk.Button(self, text="Añadir al carrito", command=self.añadir_al_carrito, width=20, font=('ARIAL', 12, 'bold'), fg='#DAD5D6', bg='#001CCF')
         self.boton_añadir_carrito.grid(column=1, row=2, padx=10, pady=5)
 
-        self.btn_detalleVenta = tk.Button(self, text="Detalle Venta", width=20, font=('ARIAL', 12, 'bold'), fg='#DAD5D6', bg='#001CCF')
+        self.btn_detalleVenta = tk.Button(self, text="Detalle Venta",command=self.verDetalleVenta,  width=20, font=('ARIAL', 12, 'bold'), fg='#DAD5D6', bg='#001CCF')
         self.btn_detalleVenta.grid(column=1, row=4, padx=10, pady=5)
 
+    def verDetalleVenta(self):
+        self.idVenta = self.get_selected_vent_id()
+        if self.idVenta:
+            DetalleVentaView(self, self.idVenta)
+        else:
+            messagebox.showerror("Error", "Seleccione una Venta")
+
+    def get_selected_vent_id(self):
+        selected_item = self.tablaVentas.selection()
+        if selected_item:
+            return self.tablaVentas.item(selected_item)['values'][0]  
+        else:
+            return None
+
+
     def cargarTablaProductos(self, where=""):
-        self.listaProductos = listarCondiciones1(where) if where else listarProductos1()
+        self.listaProductos = listarCondicionesTabla_Productos(where) if where else listarProductos_En_Venta()
         self.inventario = {p[0]: p[3] for p in self.listaProductos}
 
         frame_tablaProductos = tk.Frame(self)
@@ -89,8 +107,14 @@ class Frame_Venta(tk.Frame):
         self.tablaVentas.column('total', anchor='w', width=150)
         self.tablaVentas.column('fecha', anchor='w', width=150)
 
-        for v in self.listaVentas:
-            self.tablaVentas.insert('', 'end', values=v)
+        for venta in self.listaVentas:
+            id_venta = venta[0]
+            total = f"{venta[1]:.2f}"  # Formatear total a dos decimales
+            fecha = venta[2]
+
+            self.tablaVentas.insert('', 'end', values=(id_venta, total, fecha))
+
+
 
     def configurar_carrito(self):
         frame_carrito = tk.Frame(self)
@@ -139,7 +163,6 @@ class Frame_Venta(tk.Frame):
                 cantidad = float(self.svCantidad.get())
                 precio_unitario = float(producto[2])  # Convertir el precio a float
                 precio_total = cantidad * precio_unitario
-
                 # Formatear el código del producto para conservar los ceros a la izquierda
                 codigo_producto = str(producto[0]).zfill(3)  # Asume que el código debe tener al menos 3 dígitos
                 # Insertar el producto en el carrito con los valores formateados
@@ -161,32 +184,67 @@ class Frame_Venta(tk.Frame):
 
     def generar_venta(self):
         total = 0
+        detalles_venta = []  # Lista para almacenar los detalles de la venta
         # Recorrer todos los ítems del carrito
         for item in self.tree_carrito.get_children():
             # Obtener los valores del producto en el carrito
             valores = self.tree_carrito.item(item, "values")
             # Sumar el precio total del producto al total de la venta
             total += float(valores[3])
-            # Obtener el código del producto
-            codigo_producto = valores[0]
-            # Obtener la cantidad del producto
+            # Obtener los detalles del producto
+            codigo_producto = valores[0]  # Código del producto
             cantidad = float(valores[2])
-            # Llamar a la función para actualizar el stock del producto
-            self.actualizar_stock_salida_carrito(codigo_producto, cantidad)
+            precio_unitario = float(valores[3]) / cantidad # el precio se toma del total del carrito, por eso se divide por la cantidad
+            subtotal = cantidad * precio_unitario
+            # Obtener el idProducto del producto
+            id_producto = obtener_id_por_producto(codigo_producto)
+            if id_producto is not None:
+                # Agregar el detalle de venta a la lista
+                detalles_venta.append({'cantidad': cantidad, 'precio': precio_unitario, 'subtotal': subtotal, 'idProducto': id_producto})
+                # Llamar a la función para actualizar el stock del producto
+                self.actualizar_stock_salida_carrito(id_producto, cantidad)
+            else:
+                messagebox.showwarning("Advertencia", f"No se encontró el ID del producto para el código {codigo_producto}")
 
         # Actualizar el label con el total de la venta
-        self.label_total.config(text=f"Total de la venta: {round(total, 2)}")
-        # Recargar la tabla de productos para reflejar los cambios en el stock
+        self.label_total.config(text=f"Total de la venta: {round(total, 2)}")    
+        # Guardar la cédula del cliente si no existe
+        buscar_y_guardar_cedula(self.svCedula.get())   
+        # Obtener el ID del cliente por su cédula
+        cliente_id = obtener_id_por_cedula(self.svCedula.get())
+        self.usuario = 1
+        # Guardar la venta en la base de datos
+        self.guardar_Venta(total, self.usuario, cliente_id, detalles_venta)
+        # Recargar la tabla de productos y ventas para reflejar los cambios en el stock y las ventas
         self.cargarTablaProductos()
+        self.cargarTablaVentas()
         # Limpiar el carrito después de generar la venta
         self.tree_carrito.delete(*self.tree_carrito.get_children())
+
+
+    def guardar_Venta(self, total, usuario_id, cliente_id, detalles_venta):
+        try:
+            # Asignar la fecha actual al entry de fecha
+            fecha_actual = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+            # Crear el objeto Venta
+            venta = Venta(total, fecha_actual, usuario_id, cliente_id)
+            # Guardar la venta principal
+            guardarVenta(venta)
+            # Obtener el ID de la venta recién guardada
+            id_venta = obtener_id_venta_reciente()
+            # Guardar cada detalle de venta asociado a la venta principal
+            for detalle in detalles_venta:
+                detalle['idVenta'] = id_venta  # Asignar el ID de la venta principal al detalle
+                guardarDetalle_venta(detalle)
+            #messagebox.showinfo("Éxito", "Venta registrada correctamente")
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo guardar la venta: {e}")
 
 
     def actualizar_stock_salida_carrito(self, codigo_producto, cantidad):
         try:
             # Actualizar el stock en la base de datos restando la cantidad vendida
             actualizar_stock_db(codigo_producto, -cantidad)
-
             # Recorrer todos los ítems del carrito
             for item in self.tree_carrito.get_children():
                 # Obtener los valores del producto en el carrito
@@ -197,7 +255,6 @@ class Frame_Venta(tk.Frame):
                     self.tree_carrito.delete(item)
                     # Romper el ciclo ya que el producto ha sido encontrado y eliminado
                     break
-
             # Actualizar el label de estado con un mensaje de éxito
             self.label_status.config(text="Salida registrada para los productos del carrito")
         except ValueError:

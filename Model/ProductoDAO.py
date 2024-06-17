@@ -1,15 +1,15 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
-def actualizar_stock_db( producto, cantidad):
+
+def actualizar_stock_db(codigo, cantidad):
     connection = conexionBD()
     if connection:
         cursor = connection.cursor()
-        cursor.execute("UPDATE producto SET cantidadStock = cantidadStock + %s WHERE codigo = %s", (cantidad, producto))
+        cursor.execute("UPDATE producto SET cantidadStock = cantidadStock + %s WHERE codigo = %s", (cantidad, codigo))
         connection.commit()
         connection.close()
-
-
+        #print("Stock actualizado en la base de datos")
 
 def listarCondiciones(where):
     conexion = conexionBD()
@@ -59,8 +59,6 @@ def listarCondiciones1(where):
 
     return listarProductos  # Devolver los resultados de la consulta
 
-
-
 def eliminarProducto(idProducto):
     conexion = conexionBD()
     if conexion is None:
@@ -90,7 +88,7 @@ def editarProducto(producto, idProducto):
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
-    sql = f"""UPDATE Producto SET  tipoProducto = '{producto.tipoProducto}', nombre = '{producto.nombre}', cantidadStock = {producto.cantidadStock}, 
+    sql = f"""UPDATE Producto SET  codigo = '{producto.codigo}', tipoProducto = '{producto.tipoProducto}', nombre = '{producto.nombre}', cantidadStock = {producto.cantidadStock}, 
             precio = {producto.precio}, fechaIngreso = '{producto.fechaIngreso}' WHERE idProducto = {idProducto}"""
     
     try:
@@ -109,7 +107,6 @@ def editarProducto(producto, idProducto):
     finally:
         cursor.close()
         conexion.close() 
-
 
 def listarProductos():
     conexion = conexionBD()
@@ -152,7 +149,6 @@ def listarProductos1():
     finally:
         cursor.close()
         conexion.close()
-
 
 def guardarProducto(producto):
     conexion = conexionBD()

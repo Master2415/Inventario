@@ -9,7 +9,7 @@ def obtener_id_por_producto(codigo):
     
     try:
         cursor = conexion.cursor()
-        cursor.execute("SELECT idProducto FROM producto WHERE codigo = %s", (codigo,))
+        cursor.execute("SELECT id FROM productoStock WHERE codigo = %s", (codigo,))
         print("busco el codigo")
         resultado = cursor.fetchone()
         if resultado:
@@ -27,7 +27,7 @@ def actualizar_stock_db(idProducto, cantidad):
     connection = conexionBD()
     if connection:
         cursor = connection.cursor()
-        cursor.execute("UPDATE producto SET cantidadStock = cantidadStock + %s WHERE idProducto = %s", (cantidad, idProducto))
+        cursor.execute("UPDATE productoStock SET stock = stock + %s WHERE id = %s", (cantidad, idProducto))
         connection.commit()
         connection.close()
         print("Stock actualizado en la base de datos")
@@ -63,7 +63,7 @@ def listarCondicionesTabla_Productos(where):
         return []
     
     listarProductos = []
-    sql = f'SELECT codigo, nombre, precio, cantidadStock FROM Producto {where}'
+    sql = f'SELECT codigo, nombre, precioTotal, stock FROM productostock {where}'
 
     try:
         cursor = conexion.cursor()
@@ -158,7 +158,7 @@ def listarProductos_En_Venta():
     
     try:
         cursor = conexion.cursor()
-        cursor.execute("SELECT codigo, nombre, precio, cantidadStock FROM producto")  # Consulta para seleccionar todos los productos
+        cursor.execute("SELECT codigo, nombre, precioTotal, stock FROM productostock")  # Consulta para seleccionar todos los productos
         productos = cursor.fetchall()  # Recupera todos los registros de la consulta
         
         return productos

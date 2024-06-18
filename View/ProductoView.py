@@ -179,11 +179,16 @@ class Frame_Producto(tk.Frame):
 
         if self.idProducto == None:
             guardarProducto(producto)
+            idStock = obtener_id_por_producto(self.svCodigo.get())
+            self.actualizar_baseDatos(idStock, self.svCantidad.get())
         else:
             editarProducto(producto, self.idProducto)
 
         self.deshabilitar() # Luego de guardar se desactivan los entrys, obligando al usuario a dar click en nuevo
         self.tablaProductos() # Se refresca la tabla de los productos
+
+    def actualizar_baseDatos(self, idProducto, cantidad):
+        actualizar_stock_db(idProducto, cantidad)
 
     def editarProducto(self):
         try:

@@ -81,8 +81,18 @@ class Frame_Venta(tk.Frame):
         self.tablaProductos.column('Precio', anchor='w', width=100)
         self.tablaProductos.column('Stock', anchor='w', width=100)
 
-        for p in self.listaProductos:
-            self.tablaProductos.insert('', 'end', values=p)
+        # Insertar filas en la tabla
+        for producto in self.listaProductos:
+            codigo = producto[0]
+            nombre = producto[1]
+            precio = producto[2]
+            stock = producto[3]
+
+            # Formatear el stock con dos decimales
+            stock_formateado = f"{stock:.2f}"
+
+            self.tablaProductos.insert('', 'end', values=(codigo, nombre, precio, stock_formateado))
+
 
     def cargarTablaVentas(self, where=""):
         self.listaVentas = listarVentas()

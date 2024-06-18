@@ -10,6 +10,7 @@ def obtener_id_por_producto(codigo):
     try:
         cursor = conexion.cursor()
         cursor.execute("SELECT idProducto FROM producto WHERE codigo = %s", (codigo,))
+        print("busco el codigo")
         resultado = cursor.fetchone()
         if resultado:
             return resultado[0]
@@ -22,14 +23,14 @@ def obtener_id_por_producto(codigo):
         cursor.close()
         conexion.close()
 
-def actualizar_stock_db(codigo, cantidad):
+def actualizar_stock_db(idProducto, cantidad):
     connection = conexionBD()
     if connection:
         cursor = connection.cursor()
-        cursor.execute("UPDATE producto SET cantidadStock = cantidadStock + %s WHERE codigo = %s", (cantidad, codigo))
+        cursor.execute("UPDATE producto SET cantidadStock = cantidadStock + %s WHERE idProducto = %s", (cantidad, idProducto))
         connection.commit()
         connection.close()
-        #print("Stock actualizado en la base de datos")
+        print("Stock actualizado en la base de datos")
 
 def listarCondiciones(where):
     conexion = conexionBD()

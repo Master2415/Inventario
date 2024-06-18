@@ -155,22 +155,6 @@ class Frame_Venta(tk.Frame):
         self.lbltipo = tk.Label(frame_botones_up, text='Cedula del Cliente', font=('ARIAL', 15, 'bold'))
         self.lbltipo.grid(column=0, row=0, padx=10, pady=5)
 
-    def añadir_al_carrito(self):
-        selected_item = self.tablaProductos.focus()
-        if selected_item:
-            producto = self.tablaProductos.item(selected_item)['values']
-            try:
-                cantidad = float(self.svCantidad.get())
-                precio_unitario = float(producto[2])  # Convertir el precio a float
-                precio_total = cantidad * precio_unitario
-                # Formatear el código del producto para conservar los ceros a la izquierda
-                codigo_producto = str(producto[0]).zfill(3)  # Asume que el código debe tener al menos 3 dígitos
-                # Insertar el producto en el carrito con los valores formateados
-                self.tree_carrito.insert("", tk.END, values=(codigo_producto, producto[1], cantidad, round(precio_total, 2)))
-        
-            except ValueError:
-                self.label_status.config(text="Por favor, ingrese un número válido")
-
     def quitar_al_carrito(self):
         selected_item = self.tree_carrito.focus()
         if selected_item:
@@ -181,6 +165,24 @@ class Frame_Venta(tk.Frame):
         texto_busqueda = self.svBuscar.get()
         where = f"WHERE codigo LIKE '%{texto_busqueda}%' OR nombre LIKE '%{texto_busqueda}%'" if texto_busqueda else ""
         self.cargarTablaProductos(where)
+
+
+    def añadir_al_carrito(self):
+        selected_item = self.tablaProductos.focus()
+        if selected_item:
+            producto = self.tablaProductos.item(selected_item)['values']
+            try:
+                cantidad = float(self.svCantidad.get())
+                precio_unitario = float(producto[2])  # Convertir el precio a float
+                precio_total = cantidad * precio_unitario
+                # Formatear el código del producto para conservar los ceros a la izquierda
+                codigo_producto = str(producto[0])  # Asume que el código debe tener al menos 3 dígitos
+                # Insertar el producto en el carrito con los valores formateados
+                self.tree_carrito.insert("", tk.END, values=(codigo_producto, producto[1], cantidad, round(precio_total, 2)))
+        
+            except ValueError:
+                self.label_status.config(text="Por favor, ingrese un número válido")
+
 
     def generar_venta(self):
         total = 0
@@ -241,16 +243,16 @@ class Frame_Venta(tk.Frame):
             messagebox.showerror("Error", f"No se pudo guardar la venta: {e}")
 
 
-    def actualizar_stock_salida_carrito(self, codigo_producto, cantidad):
+    def actualizar_stock_salida_carrito(self, idProducto, cantidad):
         try:
             # Actualizar el stock en la base de datos restando la cantidad vendida
-            actualizar_stock_db(codigo_producto, -cantidad)
+            actualizar_stock_db(idProducto, -cantidad)
             # Recorrer todos los ítems del carrito
             for item in self.tree_carrito.get_children():
                 # Obtener los valores del producto en el carrito
                 valores = self.tree_carrito.item(item, "values")
                 # Comprobar si el código del producto en el carrito coincide con el código del producto actualizado
-                if valores[0] == codigo_producto:
+                if valores[0] == idProducto:
                     # Si coincide, eliminar ese producto del carrito
                     self.tree_carrito.delete(item)
                     # Romper el ciclo ya que el producto ha sido encontrado y eliminado

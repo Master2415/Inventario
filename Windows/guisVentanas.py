@@ -2,6 +2,7 @@ import tkinter as tk
 from View.ProductoView import Frame_Producto
 from View.ClienteView import Frame_Cliente
 from View.VentaView import Frame_Venta
+from View.ProveedorView2 import Frame_Proveedor
 
 class Aplicacion(tk.Tk):
     def __init__(self):
@@ -27,7 +28,7 @@ class Aplicacion(tk.Tk):
         self.btnClientes.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnClientes.pack(fill='x', pady=5, padx=5)
 
-        self.btnProveedores = tk.Button(self.frame_sidebar, text="Proveedores")
+        self.btnProveedores = tk.Button(self.frame_sidebar, text="Proveedores", command=self.mostrarProveedor)
         self.btnProveedores.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnProveedores.pack(fill='x', pady=5, padx=5)
 
@@ -67,6 +68,15 @@ class Aplicacion(tk.Tk):
          # Mostrar la vista de productos en el marco principal
         frame_Venta = Frame_Venta(self.frame_main, width=1080, height=720)
         frame_Venta.pack(fill='both', expand=True)
+
+    def mostrarProveedor(self):
+        # Limpiar el contenido anterior del marco principal
+        for widget in self.frame_main.winfo_children():
+            widget.destroy()
+        
+         # Mostrar la vista de productos en el marco principal
+        frame_Proveedor = Frame_Proveedor(self.frame_main, width=1080, height=720)
+        frame_Proveedor.pack(fill='both', expand=True)
 
         
     def salir(self):

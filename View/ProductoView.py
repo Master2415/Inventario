@@ -5,8 +5,7 @@ from tkinter import ttk
 from tkcalendar import *
 from datetime import datetime
 from Model.ProductoDAO import *
-from Model.ProveedorDAO import *
-from View.ProveedorView import *
+from Model.ProveedorDAO import obtener_Proveedores_combobox
 
 class Frame_Producto(tk.Frame):
 
@@ -20,6 +19,7 @@ class Frame_Producto(tk.Frame):
         self.lebels_Entrys()
         self.tablaProductos()
         self.deshabilitar()
+        self.cargar_proveedores()
         
 
     def lebels_Entrys(self):
@@ -40,13 +40,17 @@ class Frame_Producto(tk.Frame):
         self.lblcantidad.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblcantidad.grid(column=0, row=3, padx=10, pady=5)
 
-        self.lblprecio = tk.Label(self, text='Precio')
+        self.lblprecio = tk.Label(self, text='Precio por Kg')
         self.lblprecio.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblprecio.grid(column=0, row=4, padx=10, pady=5)
 
         self.lblfecha = tk.Label(self, text='Fecha')
         self.lblfecha.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
         self.lblfecha.grid(column=0, row=5, padx=10, pady=5)
+
+        self.lblfecha = tk.Label(self, text='Proveedor')
+        self.lblfecha.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
+        self.lblfecha.grid(column=0, row=6, padx=10, pady=5)
 
         # Entrys
         self.svCodigo = tk.StringVar()
@@ -82,7 +86,7 @@ class Frame_Producto(tk.Frame):
         self.svBuscar = tk.StringVar()
         self.entryBuscar = tk.Entry(self, textvariable=self.svBuscar)
         self.entryBuscar.config(width=40, font=('ARIAL',15))
-        self.entryBuscar.grid(column=1, row=6, padx=10, pady=5, columnspan=2)
+        self.entryBuscar.grid(column=1, row=7, padx=10, pady=5, columnspan=2)
 
         #Botones
         self.btnNuevo = tk.Button(self, text='Nuevo Producto', command=self.habilitar)
@@ -105,40 +109,30 @@ class Frame_Producto(tk.Frame):
         self.btnEliminar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnEliminar.grid(column=3, row=12, padx=10, pady=5)
 
-        self.btnProveedor = tk.Button(self, text='Proveedor',command=self.ver_proveedor)
-        self.btnProveedor.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
-        self.btnProveedor.grid(column=3, row=5, padx=10, pady=5)
-
         self.btnBuscar = tk.Button(self, text='Buscar', command=self.buscarProducto)
         self.btnBuscar.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#001CCF')
-        self.btnBuscar.grid(column=3, row=6, padx=10, pady=5)
+        self.btnBuscar.grid(column=3, row=7, padx=10, pady=5)
 
-    def ver_proveedor(self):
-        self.idProducto = self.get_selected_product_id()
-        if self.idProducto:
-            ProveedorView(self, self.idProducto)
-        else:
-            messagebox.showerror("Error", "Seleccione un producto")
+        self.proveedores = ttk.Combobox(self, state='readonly')
+        self.proveedores.config(width=40, font=('ARIAL', 12))
+        self.proveedores.grid(column=1, row=6, padx=10, pady=5, columnspan=2)
 
-    def get_selected_product_id(self):
-        selected_item = self.tabla.selection()
-        if selected_item:
-            return self.tabla.item(selected_item)['text']
-        else:
-            return None
+    def cargar_proveedores(self):
+        try:
+            lista_proveedores = obtener_Proveedores_combobox()  # Obtener los proveedores
+            self.proveedores['values'] = lista_proveedores  # Asignar la lista de nombres de proveedores al Combobox
+            if lista_proveedores:
+                self.proveedores.current(0)  # Establecer la selección inicial, si hay proveedores cargados
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo cargar los proveedores: {e}")
+
 
     def buscarProducto(self):
-        # Obtener el texto del Entry
         texto_busqueda = self.svBuscar.get()
-
-        # Verificar si se proporcionó algún texto de búsqueda
         if texto_busqueda:
-            # Crear la condición WHERE
             where = "WHERE codigo LIKE '%" + texto_busqueda + "%' OR tipoProducto LIKE '%" + texto_busqueda + "%' OR nombre LIKE '%" + texto_busqueda + "%'"
         else:
             where = ""  # Si no se proporcionó ninguna entrada, no se aplica ninguna condición WHERE
-
-        # Llamar a la función para obtener los productos con las condiciones dadas
         self.tablaProductos(where)
 
 
@@ -170,22 +164,30 @@ class Frame_Producto(tk.Frame):
         self.entryCantidad.config(state='disabled')
         self.entryPrecio.config(state='disabled')
         self.entryFecha.config(state='disabled')
+        self.proveedores.config(state='disabled')
 
         self.btnGuardar.config(state='disabled')
         self.btnCancelar.config(state='disabled') 
 
+
     def ingresarProducto(self):
+        # Obtener el proveedor seleccionado
+        proveedor_seleccionado = self.proveedores.get()
+
+        # Aquí procesas el resto de los datos del producto
         producto = Producto(self.svCodigo.get(), self.svTipo.get(), self.svNombre.get(), self.svCantidad.get(), self.svPrecio.get(), self.svFecha.get())
 
         if self.idProducto == None:
-            guardarProducto(producto)
+            # Guardar el producto usando el proveedor seleccionado
+            guardarProducto(producto, proveedor_seleccionado)
             idStock = obtener_id_por_producto(self.svCodigo.get())
             self.actualizar_baseDatos(idStock, self.svCantidad.get())
         else:
-            editarProducto(producto, self.idProducto)
+            editarProducto(producto, self.idProducto, proveedor_seleccionado)
 
-        self.deshabilitar() # Luego de guardar se desactivan los entrys, obligando al usuario a dar click en nuevo
-        self.tablaProductos() # Se refresca la tabla de los productos
+        self.deshabilitar()  # Después de guardar, deshabilitar los campos
+        self.tablaProductos()  # Actualizar la tabla de productos
+
 
     def actualizar_baseDatos(self, idProducto, cantidad):
         actualizar_stock_db(idProducto, cantidad)
@@ -230,6 +232,7 @@ class Frame_Producto(tk.Frame):
         self.entryCantidad.config(state='normal')
         self.entryPrecio.config(state='normal')
         self.entryFecha.config(state='normal')
+        self.proveedores.config(state='readonly')
 
         self.btnGuardar.config(state='normal')
         self.btnCancelar.config(state='normal') 
@@ -252,6 +255,7 @@ class Frame_Producto(tk.Frame):
         self.entryCantidad.config(state='normal')
         self.entryPrecio.config(state='normal')
         self.entryFecha.config(state='normal')
+        self.proveedores.config(state='readonly')
 
         self.btnGuardar.config(state='normal')
         self.btnCancelar.config(state='normal') 
@@ -269,7 +273,7 @@ class Frame_Producto(tk.Frame):
         frame_tabla.grid(column=0, row=10, columnspan=15, sticky='nsew')
 
         # Crear la tabla con barra de desplazamiento
-        self.tabla = ttk.Treeview(frame_tabla, columns=('idProducto', 'Codigo', 'Tipo', 'Nombre', 'Cantidad disponible', 'Precio', 'Fecha de Ingreso'))
+        self.tabla = ttk.Treeview(frame_tabla, columns=('idProducto', 'Codigo', 'Producto', 'Tipo', 'Cant. ingresada', 'Precio', 'Fecha de Ingreso', 'Proveedor'))
         scrollbar = ttk.Scrollbar(frame_tabla, orient='vertical', command=self.tabla.yview)
         self.tabla.configure(yscroll=scrollbar.set)
         self.tabla.pack(side='left', fill='both', expand=True)
@@ -277,19 +281,24 @@ class Frame_Producto(tk.Frame):
 
         self.tabla.heading('#0', text='ID')
         self.tabla.heading('#1', text='Codigo')
-        self.tabla.heading('#2', text='Tipo')
-        self.tabla.heading('#3', text='Nombre')
+        self.tabla.heading('#2', text='Producto')
+        self.tabla.heading('#3', text='Tipo')
         self.tabla.heading('#4', text='Cant. ingresada')
         self.tabla.heading('#5', text='Precio')
         self.tabla.heading('#6', text='Fecha de Ingreso')
+        self.tabla.heading('#7', text='Proveedor')
 
         self.tabla.column("#0", anchor='w', width=100)
         self.tabla.column("#1", anchor='w', width=130)
-        self.tabla.column("#2", anchor='w', width=150)
-        self.tabla.column("#3", anchor='w', width=180)
-        self.tabla.column("#4", anchor='w', width=120)
+        self.tabla.column("#2", anchor='w', width=180)
+        self.tabla.column("#3", anchor='w', width=150)
+        self.tabla.column("#4", anchor='w', width=150)
         self.tabla.column("#5", anchor='w', width=120)
-        self.tabla.column("#6", anchor='w', width=170)
+        self.tabla.column("#6", anchor='w', width=120)
+        self.tabla.column("#7", anchor='w', width=170)
 
         for p in self.listaProductos:
-            self.tabla.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6]), tags=('evenrow',))
+            precio_formateado = "{:,.2f}".format(p[5])  # Asumiendo que p[5] es el precio
+            
+            self.tabla.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], precio_formateado, p[6], p[7]), tags=('evenrow',))
+

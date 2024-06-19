@@ -1,6 +1,25 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+def obtener_Proveedores_combobox():
+    try:
+        connection = conexionBD()
+        if connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT nombre FROM proveedor WHERE estado = 1")    
+            resultados = cursor.fetchall()
+            connection.close()
+            
+            # Crear un diccionario con los nombres de los proveedores
+            lista_proveedores = [row[0] for row in resultados]
+            return lista_proveedores
+        else:
+            return []  # Devolver una lista vacía si no se puede conectar a la base de datos
+
+    except Exception as e:
+        print(f"Error al obtener proveedores: {e}")
+        return []  # Manejar errores devolviendo una lista vacía
+
 def eliminarProveedor(idProveedor):
     conexion = conexionBD()
     if conexion is None:

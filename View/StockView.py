@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from Model.StockDAO import listarStock
+from Model.ProveedorDAO import *
+from View.ProveedorView import ProveedorView
+
 
 class Frame_Stock(tk.Frame):
     def __init__(self, root, width=1745, height=750):
@@ -50,7 +53,7 @@ class Frame_Stock(tk.Frame):
         self.tablaProductosStock.heading('#3', text='Tipo')
         self.tablaProductosStock.heading('#4', text='Utilidad')
         self.tablaProductosStock.heading('#5', text='IVA')
-        self.tablaProductosStock.heading('#6', text='Precio Total')
+        self.tablaProductosStock.heading('#6', text='Precio a la venta')
         self.tablaProductosStock.heading('#7', text='Kg Disponibles')
 
         self.tablaProductosStock.column('#0', anchor=tk.W, width=50)
@@ -70,6 +73,10 @@ class Frame_Stock(tk.Frame):
         self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C')
         self.btnRegistroEntrda.pack(side='left', padx=10, pady=5)
 
+        self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Ver Proveedores', command=self.ver_proveedor)
+        self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C')
+        self.btnRegistroEntrda.pack(side='left', padx=10, pady=5)
+
         self.btnEditar = tk.Button(self.btn_frame, text='Modificar')
         self.btnEditar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#007ACC')
         self.btnEditar.pack(side='left', padx=10, pady=5)
@@ -82,9 +89,27 @@ class Frame_Stock(tk.Frame):
         try:
             self.listaProductos = listarStock()
             for i, p in enumerate(self.listaProductos):
+                # Formatear el precio a la venta con separadores de miles y dos decimales
+                precio_venta = "{:,.2f}".format(p[6])
+                # Insertar en la tabla, formateando como cadena
                 tags = ('evenrow',) if i % 2 == 0 else ()
-                self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7]), tags=tags)
+                self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], precio_venta, p[7]), tags=tags)
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo mostrar el proveedor: {e}")
+
+    
+    def ver_proveedor(self):
+        self.idStock = self.get_selected_product_id()
+        if self.idStock:
+            ProveedorView(self, self.idStock)
+        else:
+            messagebox.showerror("Error", "Seleccione un producto")
+
+    def get_selected_product_id(self):
+        selected_item = self.tablaProductosStock.selection()
+        if selected_item:
+            return self.tablaProductosStock.item(selected_item)['text']
+        else:
+            return None
 
 

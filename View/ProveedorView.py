@@ -13,7 +13,7 @@ class ProveedorView(tk.Toplevel):
         self.idProducto = idProducto
         self.title('Proveedor del producto')
         self.resizable(0, 0)
-        self.config(bg='#BBBBBB')
+        self.config(bg='#f0f0f0')
         self.create_widgets()
         self.populate_providers()
         self.formulario_frame = None  # Inicializa la variable aquí

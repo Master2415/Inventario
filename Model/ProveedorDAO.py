@@ -1,6 +1,31 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+
+def listarProveedorCondicion(where=""):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return []
+    
+    try:
+        cursor = conexion.cursor()
+        # Construye la consulta SQL con el WHERE proporcionado, asegúrate de que está correcto
+        query = f"SELECT * FROM proveedor WHERE estado = 1 {where}"
+        cursor.execute(query)
+        productos = cursor.fetchall()  # Recupera todos los registros de la consulta
+        
+        return productos
+
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo listar los Proveedores: {e}")
+        return []
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+
 def obtener_Proveedores_combobox():
     try:
         connection = conexionBD()
@@ -160,5 +185,3 @@ class Proveedor():
         self.telefono = telefono
         self.direccion = direccion
         self.correo = correo
-        #self.estado = estado
-        #self.Producto_id = Producto_id

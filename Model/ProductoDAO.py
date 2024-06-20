@@ -40,19 +40,20 @@ def listarCondiciones(where):
     
     listarProductos = []
     sql = f"""SELECT 
-                p.idProducto, 
-                p.codigo, 
-                ps.nombre AS nombre_productostock, 
-                ps.tipo AS tipo_productostock, 
-                p.cantidadStock, 
-                p.precio, 
-                p.fechaIngreso, 
-                prov.nombre AS nombre_proveedor
-            FROM 
-                Producto p
-                LEFT JOIN productostock ps ON p.idProductoStock = ps.id
-                LEFT JOIN proveedor prov ON p.idProveedor = prov.idProveedor
-            {where}"""
+            p.idProducto, 
+            p.codigo, 
+            ps.nombre AS nombre_productostock, 
+            ps.tipo AS tipo_productostock, 
+            p.cantidadStock, 
+            p.precio, 
+            p.fechaIngreso, 
+            prov.nombre AS nombre_proveedor
+        FROM 
+            Producto p
+            LEFT JOIN productostock ps ON p.idProductoStock = ps.id
+            LEFT JOIN proveedor prov ON p.idProveedor = prov.idProveedor
+        {where}"""
+
 
     try:
         cursor = conexion.cursor()
@@ -184,8 +185,6 @@ def editarProducto(producto, idProducto, nombreProveedor):
     
     sql = f"""UPDATE Producto SET 
                 codigo = '{producto.codigo}', 
-                tipoProducto = '{producto.tipoProducto}', 
-                nombre = '{producto.nombre}', 
                 cantidadStock = {producto.cantidadStock}, 
                 precio = {producto.precio}, 
                 fechaIngreso = '{producto.fechaIngreso}',
@@ -218,8 +217,18 @@ def guardarProducto(producto, nombreProveedor):
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
-    sql = f"""INSERT INTO Producto (codigo, tipoProducto, nombre, cantidadStock, precio, fechaIngreso, idProductoStock, idProveedor) VALUES
-            ('{producto.codigo}', '{producto.tipoProducto}', '{producto.nombre}', {producto.cantidadStock}, {producto.precio}, '{producto.fechaIngreso}', 
+    sql = f"""INSERT INTO Producto 
+            (codigo, 
+            cantidadStock, 
+            precio, 
+            fechaIngreso, 
+            idProductoStock, 
+            idProveedor) 
+            VALUES
+            ('{producto.codigo}', 
+            {producto.cantidadStock}, 
+            {producto.precio}, 
+            '{producto.fechaIngreso}', 
             (SELECT id FROM productostock WHERE codigo= '{producto.codigo}'),
             (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}'))"""
     
@@ -243,11 +252,9 @@ def guardarProducto(producto, nombreProveedor):
 
 
 class Producto:
-        def __init__(self, codigo, tipoProducto, nombre, cantidadStock, precio, fechaIngreso):
+        def __init__(self, codigo, cantidadStock, precio, fechaIngreso):
             self.idProducto = None
             self.codigo = codigo
-            self.tipoProducto = tipoProducto
-            self.nombre = nombre
             self.cantidadStock = cantidadStock
             self.precio = precio
             self.fechaIngreso = fechaIngreso

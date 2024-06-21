@@ -32,12 +32,13 @@ def actualizar_stock_db(idProducto, cantidad):
         connection.close()
         print("Stock actualizado en la base de datos")
 
+        
 def listarCondiciones(where):
     conexion = conexionBD()
     if conexion is None:
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return []
-    
+
     listarProductos = []
     sql = f"""SELECT 
             p.idProducto, 
@@ -52,8 +53,7 @@ def listarCondiciones(where):
             Producto p
             LEFT JOIN productostock ps ON p.idProductoStock = ps.id
             LEFT JOIN proveedor prov ON p.idProveedor = prov.idProveedor
-        {where}"""
-
+        WHERE 1=1 {where}"""
 
     try:
         cursor = conexion.cursor()
@@ -69,6 +69,7 @@ def listarCondiciones(where):
         conexion.close()
 
     return listarProductos  # Devolver los resultados de la consulta
+
 
 
 def listarProductos():
@@ -136,7 +137,7 @@ def eliminarProducto(idProducto):
     if conexion is None:
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
-    sql = f"""DELETE FROM Producto WHERE idProducto = {idProducto}"""
+    sql = f"""UPDATE producto SET estado = 0 WHERE idProducto = {idProducto}"""
     try:
         cursor = conexion.cursor()
         cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión

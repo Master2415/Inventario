@@ -85,6 +85,8 @@ class Frame_Stock(tk.Frame):
         self.btnEliminar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#D9534F')
         self.btnEliminar.pack(side='left', padx=10, pady=5)
 
+    
+
     def populate_providers(self):
         try:
             self.listaProductos = listarStock()

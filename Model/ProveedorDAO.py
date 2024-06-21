@@ -102,6 +102,39 @@ def editarProveedor(Proveedor, idProveedor):
         cursor.close()
         conexion.close()
 
+def editarProveedorOnly(Proveedor, idProveedor, nombreProducto):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return
+    
+    sql = f"""UPDATE proveedor SET 
+         nombre = '{Proveedor.nombre}',
+         tipo_proveedor = '{Proveedor.tipo_proveedor}',
+         telefono = '{Proveedor.telefono}',
+         direccion = '{Proveedor.direccion}',
+         correo = '{Proveedor.correo}',
+         Producto_id = (SELECT id FROM productostock WHERE nombre = '{nombreProducto}')
+         WHERE idProveedor = {idProveedor}"""
+
+    
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
+        conexion.commit()  # Asegura que los cambios se guarden en la base de datos
+        title = 'Editar Proveedor'  
+        mensaje = 'Proveedor Editado Exitosamente'  
+        messagebox.showinfo(title, mensaje) 
+
+    except Exception as e:
+        title = 'Editar Proveedor'
+        mensaje = f'Error al Editar el Proveedor: {e}'
+        messagebox.showinfo(title, mensaje)
+    
+    finally:
+        cursor.close()
+        conexion.close()
+
 
 def agregarProveedor(Proveedor, Producto_id):
     conexion = conexionBD()
@@ -116,13 +149,46 @@ def agregarProveedor(Proveedor, Producto_id):
         cursor = conexion.cursor()
         cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
         conexion.commit()  # Asegura que los cambios se guarden en la base de datos
-        title = 'Registrar Producto'  
-        mensaje = 'Producto Registrado Exitosamente'  
+        title = 'Registrar Proveedor'  
+        mensaje = 'Proveedor Registrado Exitosamente'  
         messagebox.showinfo(title, mensaje) 
 
     except Exception as e:
-        title = 'Registrar Producto'
-        mensaje = f'Error al Registrar el Producto: {e}'
+        title = 'Registrar Proveedor'
+        mensaje = f'Error al Registrar el Proveedor: {e}'
+        messagebox.showinfo(title, mensaje)
+    
+    finally:
+        cursor.close()
+        conexion.close()
+
+
+def agregarProveedorOnly(Proveedor, producto):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return
+    
+    sql = f"""INSERT INTO proveedor (nombre, tipo_proveedor, telefono, direccion, correo, estado, Producto_id) VALUES
+            ('{Proveedor.nombre}', 
+            '{Proveedor.tipo_proveedor}', 
+            '{Proveedor.telefono}', 
+            '{Proveedor.direccion}', 
+            '{Proveedor.correo}', 
+            1, 
+            (SELECT id FROM productostock WHERE nombre = '{producto}'))"""
+    
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
+        conexion.commit()  # Asegura que los cambios se guarden en la base de datos
+        title = 'Registrar Proveedor'  
+        mensaje = 'Proveedor Registrado Exitosamente'  
+        messagebox.showinfo(title, mensaje) 
+
+    except Exception as e:
+        title = 'Registrar Proveedor'
+        mensaje = f'Error al Registrar el Proveedor: {e}'
         messagebox.showinfo(title, mensaje)
     
     finally:

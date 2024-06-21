@@ -143,11 +143,11 @@ class Frame_Producto(tk.Frame):
 
         # Botones
         self.btnGuardar = tk.Button(self.formulario_frame, text='Guardar', command=self.ingresarProducto)
-        self.btnGuardar.config(width=20, font=('Arial', 12, 'bold'), fg='#DAD5D6', bg='#158645')
+        self.btnGuardar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C')
         self.btnGuardar.grid(column=1, row=5, padx=10, pady=5)
 
         self.btnCancelar = tk.Button(self.formulario_frame, text='Cancelar', command=self.deshabilitar)
-        self.btnCancelar.config(width=20, font=('Arial', 12, 'bold'), fg='#DAD5D6', bg='#CF0000')
+        self.btnCancelar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#D9534F')
         self.btnCancelar.grid(column=2, row=5, padx=10, pady=5)
 
     def cargar_proveedores(self):
@@ -163,7 +163,7 @@ class Frame_Producto(tk.Frame):
     def buscarProducto(self):
         texto_busqueda = self.svBuscar.get()
         if texto_busqueda:
-            where = f"AND (p.codigo LIKE '%{texto_busqueda}%' OR ps.tipoProducto LIKE '%{texto_busqueda}%' OR ps.nombre LIKE '%{texto_busqueda}%')"
+            where = f"AND (p.codigo LIKE '%{texto_busqueda}%' OR ps.tipo LIKE '%{texto_busqueda}%' OR ps.nombre LIKE '%{texto_busqueda}%')"
         else:
             where = ""  # Si no se proporcionó ninguna entrada, no se aplica ninguna condición WHERE
         self.tablaProductos(where)
@@ -211,7 +211,7 @@ class Frame_Producto(tk.Frame):
             self.Cantidad                   = self.tabla.item(self.tabla.selection())['values'][3]
             self.precio                     = self.tabla.item(self.tabla.selection())['values'][4]
             self.fecha                      = self.tabla.item(self.tabla.selection())['values'][5]
-            self.proveedor                      = self.tabla.item(self.tabla.selection())['values'][6]
+            self.proveedor                  = self.tabla.item(self.tabla.selection())['values'][6]
             
             self.habilitarEditar()
 
@@ -220,7 +220,7 @@ class Frame_Producto(tk.Frame):
             self.entryCantidad.insert(0, self.Cantidad)
             self.entryPrecio.insert(0, self.precio)
             self.entryFecha.insert(0, self.fecha)
-            self.entryFecha.insert(0, self.proveedor)
+            self.proveedores.insert(0, self.proveedor)
       
         except:
             title = 'Editar Producto'

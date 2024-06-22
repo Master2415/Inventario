@@ -4,102 +4,274 @@ from tkinter import messagebox
 from Model.StockDAO import listarStock
 from Model.ProveedorDAO import *
 from View.ProveedorView import ProveedorView
+from Model.StockDAO import *
 
 
 class Frame_Stock(tk.Frame):
     def __init__(self, root, width=1745, height=750):
         super().__init__(root, width=width, height=height)
         self.root = root
-        self.config(bg='#f0f0f0')  # Color de fondo del frame principal
+        self.config(bg='#f0f0f0')
         self.pack(fill='both', expand=True)
         self.idStock = None
-        self.formulario_frame = None 
         self.mostrar_formulario_agregar()
-        self.populate_providers()
+        self.create_table()
+        self.btnBuscar.config(command=self.buscarProducto)
 
     def mostrar_formulario_agregar(self):
-        if self.formulario_frame:
-            self.formulario_frame.destroy()
-
-        self.formulario_frame = tk.Frame(self, bg='#f0f0f0')
-        self.formulario_frame.pack(pady=20, padx=20, anchor='n')
-
-        entry_bg = '#ffffff'
+        self.buscar_frame = tk.Frame(self, bg='#f0f0f0')
+        self.buscar_frame.pack(pady=10)
 
         self.svBuscar = tk.StringVar()
-        self.entryBuscar = tk.Entry(self.formulario_frame, textvariable=self.svBuscar)
-        self.entryBuscar.config(width=40, font=('Arial', 15), bg=entry_bg)
-        self.entryBuscar.grid(column=0, row=0, padx=10, pady=5, sticky='w')
+        self.entryBuscar = tk.Entry(self.buscar_frame, textvariable=self.svBuscar)
+        self.entryBuscar.config(width=40, font=('Arial', 15), bg='#ffffff')
+        self.entryBuscar.grid(column=0, row=0, padx=10, pady=5)
 
-        self.btnBuscar = tk.Button(self.formulario_frame, text='Buscar')
+        self.btnBuscar = tk.Button(self.buscar_frame, text='Buscar', command=self.buscarProducto)
         self.btnBuscar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#007ACC')
         self.btnBuscar.grid(column=1, row=0, padx=10, pady=5)
 
-        self.tabla_frame = tk.Frame(self)
-        self.tabla_frame.pack(pady=(20, 0), padx=20, anchor='n')
+    def create_table(self, where=""):
+        if hasattr(self, 'tablaProductosStock'):
+            self.tablaProductosStock.delete(*self.tablaProductosStock.get_children())
 
-        self.tablaProductosStock = ttk.Treeview(self.tabla_frame, columns=('ID', 'Codigo', 'Nombre', 'Tipo', 'Utilidad', 'IVA', 'Precio Total', 'Kg Disponibles'))
-        self.tablaProductosStock.pack(side='left')
+        if len(where) > 0:
+            self.listaProductosStock = listarStockWhere(where)
+        else:
+            self.listaProductosStock = listarStock()
 
-        self.scrollProveedor = ttk.Scrollbar(self.tabla_frame, orient='vertical', command=self.tablaProductosStock.yview)
-        self.scrollProveedor.pack(side='right', fill='y')
+        if not hasattr(self, 'tabla_frame'):
+            self.tabla_frame = tk.Frame(self)
+            self.tabla_frame.pack(fill='x', expand=False)
 
-        self.tablaProductosStock.configure(yscrollcommand=self.scrollProveedor.set)
-        self.tablaProductosStock.tag_configure('evenrow', background='#E8E8E8')
+            self.tablaProductosStock = ttk.Treeview(self.tabla_frame, height=10, columns=('ID', 'Codigo', 'Nombre', 'Tipo', 'Utilidad', 'IVA', 'Precio Total', 'Kg Disponibles', 'Precio Neto'))
+            self.scrollProducto = ttk.Scrollbar(self.tabla_frame, orient='vertical', command=self.tablaProductosStock.yview)
+            self.tablaProductosStock.configure(yscroll=self.scrollProducto.set)
+            self.tablaProductosStock.pack(side='left', fill='both', expand=True)
+            self.scrollProducto.pack(side='right', fill='y')
 
-        self.tablaProductosStock.heading('#0', text='ID')
-        self.tablaProductosStock.heading('#1', text='Codigo')
-        self.tablaProductosStock.heading('#2', text='Nombre')
-        self.tablaProductosStock.heading('#3', text='Tipo')
-        self.tablaProductosStock.heading('#4', text='Utilidad')
-        self.tablaProductosStock.heading('#5', text='IVA')
-        self.tablaProductosStock.heading('#6', text='Precio a la venta')
-        self.tablaProductosStock.heading('#7', text='Kg Disponibles')
+            self.tablaProductosStock.heading('#0', text='ID')
+            self.tablaProductosStock.heading('#1', text='Codigo')
+            self.tablaProductosStock.heading('#2', text='Nombre')
+            self.tablaProductosStock.heading('#3', text='Tipo')
+            self.tablaProductosStock.heading('#4', text='Utilidad')
+            self.tablaProductosStock.heading('#5', text='IVA')
+            self.tablaProductosStock.heading('#6', text='Precio Total')
+            self.tablaProductosStock.heading('#7', text='Kg Disponibles')
+            self.tablaProductosStock.heading('#8', text='Precio Neto')
 
-        self.tablaProductosStock.column('#0', anchor=tk.W, width=50)
-        self.tablaProductosStock.column('#1', anchor=tk.W, width=150)
-        self.tablaProductosStock.column('#2', anchor=tk.W, width=150)
-        self.tablaProductosStock.column('#3', anchor=tk.W, width=150)
-        self.tablaProductosStock.column('#4', anchor=tk.W, width=150)
-        self.tablaProductosStock.column('#5', anchor=tk.W, width=150)
-        self.tablaProductosStock.column('#6', anchor=tk.W, width=150)
-        self.tablaProductosStock.column('#7', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#0', anchor=tk.W, width=50)
+            self.tablaProductosStock.column('#1', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#2', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#3', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#4', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#5', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#6', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#7', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#8', anchor=tk.W, width=150)
+
+        for p in self.listaProductosStock:
+            self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]), tags=('evenrow',))
 
         # Botones debajo de la tabla
         self.btn_frame = tk.Frame(self, bg='#f0f0f0')
         self.btn_frame.pack(pady=(10, 20), anchor='n')
 
-        self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Ver registros de entrada')
-        self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C')
-        self.btnRegistroEntrda.pack(side='left', padx=10, pady=5)
+        self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Ingresos del producto')
+        self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
+        self.btnRegistroEntrda.grid(column=0, row=0, padx=10, pady=5)
 
         self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Ver Proveedores', command=self.ver_proveedor)
-        self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C')
-        self.btnRegistroEntrda.pack(side='left', padx=10, pady=5)
+        self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
+        self.btnRegistroEntrda.grid(column=1, row=0, padx=10, pady=5)
 
-        self.btnEditar = tk.Button(self.btn_frame, text='Modificar')
-        self.btnEditar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#007ACC')
-        self.btnEditar.pack(side='left', padx=10, pady=5)
 
-        self.btnEliminar = tk.Button(self.btn_frame, text='Eliminar Proveedor')
-        self.btnEliminar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#D9534F')
-        self.btnEliminar.pack(side='left', padx=10, pady=5)
+        if not hasattr(self, 'botones_frame'):
+            self.botones_frame = tk.Frame(self, bg='#f0f0f0')
+            self.botones_frame.pack(pady=10)
 
+            self.btnNuevo = tk.Button(self.botones_frame, text='Agregar Producto', command=self.habilitar)
+            self.btnNuevo.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C')
+            self.btnNuevo.grid(column=0, row=0, padx=10, pady=5)
+
+            self.btnEditar = tk.Button(self.botones_frame, text='Editar Producto', command=self.editarProducto)
+            self.btnEditar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#007ACC')
+            self.btnEditar.grid(column=1, row=0, padx=10, pady=5)
+
+            self.btnEliminar = tk.Button(self.botones_frame, text='Eliminar Producto', command=self.eliminarProducto)
+            self.btnEliminar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#D9534F')
+            self.btnEliminar.grid(column=2, row=0, padx=10, pady=5)
+
+        if not hasattr(self, 'formulario_frame'):
+            self.formulario_frame = tk.Frame(self, bg='#BBBBBB')
+            self.formulario_frame.pack(fill='x', padx=20, pady=10)
+
+            self.lblCodigo = tk.Label(self.formulario_frame, text='Codigo')
+            self.lblCodigo.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
+            self.lblCodigo.grid(column=0, row=1, padx=10, pady=5)
+
+            self.lblNombre = tk.Label(self.formulario_frame, text='Nombre')
+            self.lblNombre.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
+            self.lblNombre.grid(column=0, row=2, padx=10, pady=5)
+
+            self.lblTipo = tk.Label(self.formulario_frame, text='Tipo Producto')
+            self.lblTipo.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
+            self.lblTipo.grid(column=0, row=3, padx=10, pady=5)
+
+            self.lblPrecioNeto = tk.Label(self.formulario_frame, text='Precio Neto')
+            self.lblPrecioNeto.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
+            self.lblPrecioNeto.grid(column=0, row=4, padx=10, pady=5)
+
+            self.lblUtilidad = tk.Label(self.formulario_frame, text='Utilidad')
+            self.lblUtilidad.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
+            self.lblUtilidad.grid(column=0, row=5, padx=10, pady=5)
+
+            self.lblIVA = tk.Label(self.formulario_frame, text='IVA')
+            self.lblIVA.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
+            self.lblIVA.grid(column=0, row=6, padx=10, pady=5)
+
+            self.svcodigo = tk.StringVar()
+            self.entrycodigo = tk.Entry(self.formulario_frame, textvariable=self.svcodigo)
+            self.entrycodigo.config(width=40, font=('Arial', 15))
+            self.entrycodigo.grid(column=1, row=1, padx=10, pady=5, columnspan=2)
+
+            self.svNombre = tk.StringVar()
+            self.entryNombre = tk.Entry(self.formulario_frame, textvariable=self.svNombre)
+            self.entryNombre.config(width=40, font=('Arial', 15))
+            self.entryNombre.grid(column=1, row=2, padx=10, pady=5, columnspan=2)
+
+            self.svTipo = tk.StringVar()
+            self.entryTipo = tk.Entry(self.formulario_frame, textvariable=self.svTipo)
+            self.entryTipo.config(width=40, font=('Arial', 15))
+            self.entryTipo.grid(column=1, row=3, padx=10, pady=5, columnspan=2)
+
+            self.svPrecioNeto = tk.StringVar()
+            self.entryPrecio = tk.Entry(self.formulario_frame, textvariable=self.svPrecioNeto)
+            self.entryPrecio.config(width=40, font=('Arial', 15))
+            self.entryPrecio.grid(column=1, row=4, padx=10, pady=5, columnspan=2)
+
+            self.svUtilidad = tk.StringVar()
+            self.entryUtilidad = tk.Entry(self.formulario_frame, textvariable=self.svUtilidad)
+            self.entryUtilidad.config(width=40, font=('Arial', 15))
+            self.entryUtilidad.grid(column=1, row=5, padx=10, pady=5, columnspan=2)
+
+            self.svIVA = tk.StringVar()
+            self.entryIVA = tk.Entry(self.formulario_frame, textvariable=self.svIVA)
+            self.entryIVA.config(width=40, font=('Arial', 15))
+            self.entryIVA.grid(column=1, row=6, padx=10, pady=5, columnspan=2)
+
+            self.btnGuardar = tk.Button(self.formulario_frame, text='Guardar', command=self.agregarProducto)
+            self.btnGuardar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C', cursor='hand2')
+            self.btnGuardar.grid(column=1, row=7, padx=10, pady=10)
+
+            self.btnCancelar = tk.Button(self.formulario_frame, text='Cancelar', command=self.deshabilitar)
+            self.btnCancelar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#D9534F', cursor='hand2')
+            self.btnCancelar.grid(column=2, row=7, padx=10, pady=10)
+
+            self.deshabilitar()
     
 
-    def populate_providers(self):
+    def agregarProducto(self):
+        precio_neto = float(self.svPrecioNeto.get())
+        utilidad = float(self.svUtilidad.get())
+        iva = float(self.svIVA.get())
+
+        self.precioTotal = precio_neto * (1 + utilidad + iva)
+
+        productoStock = ProductoStock(self.svcodigo.get(), self.svNombre.get(), self.svTipo.get(), 
+                                      self.svUtilidad.get(), self.svIVA.get(), self.precioTotal, self.svPrecioNeto.get())
+          
+        if self.idStock is None:
+            guardarProStock(productoStock)
+        else:
+            editarProStock(self.idStock, productoStock)
+     
+        self.create_table()
+
+
+    def habilitar(self):
+        self.svcodigo.set('')
+        self.svNombre.set('')
+        self.svTipo.set('')
+        self.svPrecioNeto.set('')
+        self.svUtilidad.set('')
+        self.svIVA.set('')
+
+        self.entrycodigo.config(state='normal')
+        self.entryNombre.config(state='normal')
+        self.entryTipo.config(state='normal')
+        self.entryPrecio.config(state='normal')
+        self.entryUtilidad.config(state='normal')
+        self.entryIVA.config(state='normal')
+
+        self.btnGuardar.config(state='normal')
+        self.btnCancelar.config(state='normal')
+        
+    def deshabilitar(self):
+        self.svcodigo.set('')
+        self.svNombre.set('')
+        self.svTipo.set('')
+        self.svPrecioNeto.set('')
+        self.svUtilidad.set('')
+        self.svIVA.set('')
+
+        self.entrycodigo.config(state='disabled')
+        self.entryNombre.config(state='disabled')
+        self.entryTipo.config(state='disabled')
+        self.entryPrecio.config(state='disabled')
+        self.entryUtilidad.config(state='disabled')
+        self.entryIVA.config(state='disabled')
+
+        self.btnGuardar.config(state='disabled')
+        self.btnCancelar.config(state='disabled')
+    
+    def buscarProducto(self):
+        valor = self.svBuscar.get()
+        if valor:
+            where = f"codigo LIKE '%{valor}%' OR nombre LIKE '%{valor}%' OR tipo LIKE '%{valor}%'"
+        else:
+            where = ""  # Si no se proporcionó ninguna entrada, no se aplica ninguna condición WHERE
+        
+        self.create_table(where)
+
+
+    def editarProducto(self):
         try:
-            self.listaProductos = listarStock()
-            for i, p in enumerate(self.listaProductos):
-                # Formatear el precio a la venta con separadores de miles y dos decimales
-                precio_venta = "{:,.2f}".format(p[6])
-                # Insertar en la tabla, formateando como cadena
-                tags = ('evenrow',) if i % 2 == 0 else ()
-                self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], precio_venta, p[7]), tags=tags)
-        except Exception as e:
-            messagebox.showerror("Error", f"No se pudo mostrar el proveedor: {e}")
+            try:       
+                self.idStock =      self.tablaProductosStock.item(self.tablaProductosStock.selection())['text']
+                self.codigo =       self.tablaProductosStock.item(self.tablaProductosStock.selection())['values'][0]
+                self.nombre =       self.tablaProductosStock.item(self.tablaProductosStock.selection())['values'][1]
+                self.tipo =         self.tablaProductosStock.item(self.tablaProductosStock.selection())['values'][2]
+                self.utilidad =     (self.tablaProductosStock.item(self.tablaProductosStock.selection())['values'][3])  # Convertir a float
+                self.iva =          (self.tablaProductosStock.item(self.tablaProductosStock.selection())['values'][4])  # Convertir a float
+                self.precioNeto =   self.tablaProductosStock.item(self.tablaProductosStock.selection())['values'][7]
+                
+                self.habilitar()
 
-    
+                # Actualizar las variables de los widgets de entrada
+                self.svcodigo.set(self.codigo)
+                self.svNombre.set(self.nombre)
+                self.svTipo.set(self.tipo)
+                self.svUtilidad.set(self.utilidad)
+                self.svIVA.set(self.iva)
+                self.svPrecioNeto.set(self.precioNeto)           
+            except IndexError as e:
+                messagebox.showerror('Error', 'Los valores seleccionados no son correctos')
+        except ValueError as e:
+            messagebox.showerror('Error', f'Error de conversión: {str(e)}')
+        except Exception as e:
+            messagebox.showerror('Error', f'Error inesperado: {str(e)}')     
+
+
+    def eliminarProducto(self):
+        try:
+            self.idStock = self.tablaProductosStock.item(self.tablaProductosStock.selection())['text']
+            eliminarProStock(self.idStock)
+            self.create_table()
+        except IndexError as e:
+            messagebox.showerror('Error', 'Seleccione un producto de la tabla')
+
+
     def ver_proveedor(self):
         self.idStock = self.get_selected_product_id()
         if self.idStock:
@@ -113,5 +285,4 @@ class Frame_Stock(tk.Frame):
             return self.tablaProductosStock.item(selected_item)['text']
         else:
             return None
-
 

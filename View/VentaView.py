@@ -119,11 +119,10 @@ class Frame_Venta(tk.Frame):
 
         for venta in self.listaVentas:
             id_venta = venta[0]
-            total = f"{venta[1]:.2f}"  # Formatear total a dos decimales
+            total = f"{venta[1]:,.2f}"  # Formatear total a dos decimales
             fecha = venta[2]
 
             self.tablaVentas.insert('', 'end', values=(id_venta, total, fecha))
-
 
 
     def configurar_carrito(self):
@@ -173,7 +172,11 @@ class Frame_Venta(tk.Frame):
 
     def buscarProducto(self):
         texto_busqueda = self.svBuscar.get()
-        where = f"WHERE codigo LIKE '%{texto_busqueda}%' OR nombre LIKE '%{texto_busqueda}%'" if texto_busqueda else ""
+        if texto_busqueda:
+            where = where = f"codigo LIKE '%{texto_busqueda}%' OR nombre LIKE '%{texto_busqueda}%'"
+        else:
+            where = ""
+
         self.cargarTablaProductos(where)
 
 

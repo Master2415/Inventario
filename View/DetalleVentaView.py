@@ -28,8 +28,8 @@ class DetalleVentaView(tk.Toplevel):
 
             for i, detalle in enumerate(self.listaDetalleVenta):
                 cantidad = detalle[1]
-                precio = f"{detalle[2]:.2f}"  # Formatear precio a dos decimales
-                subtotal = f"{detalle[3]:.2f}"
+                precio = f"{detalle[2]:,.2f}"  # Formatear precio a dos decimales
+                subtotal = f"{detalle[3]:,.2f}"
                 id_venta = detalle[4]
                 codigo_producto = detalle[5]  # Suponiendo que ahora el detalle contiene el código del producto
 
@@ -42,7 +42,6 @@ class DetalleVentaView(tk.Toplevel):
 
         except Exception as e:
             messagebox.showerror("Error", f"No se pudo mostrar el detalle de venta: {e}")
-
 
     
     

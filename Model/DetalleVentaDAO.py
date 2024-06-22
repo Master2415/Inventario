@@ -38,7 +38,7 @@ def listaDetalleVenta(idVenta):
         cursor.execute("""
             SELECT dv.id, dv.cantidad, dv.precio, dv.subTotal, dv.Venta_idVenta, p.codigo 
             FROM detalleventa dv
-            JOIN producto p ON dv.producto_idProducto = p.idProducto
+            JOIN productostock p ON dv.producto_idProducto = p.id
             WHERE dv.Venta_idVenta = %s
         """, (idVenta,))
         resultado = cursor.fetchall()

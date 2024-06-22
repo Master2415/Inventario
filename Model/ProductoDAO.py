@@ -53,7 +53,7 @@ def listarCondiciones(where):
             Producto p
             LEFT JOIN productostock ps ON p.idProductoStock = ps.id
             LEFT JOIN proveedor prov ON p.idProveedor = prov.idProveedor
-        WHERE 1=1 {where}"""
+        WHERE 1=1 {where} AND WHERE p.estado = 1"""
 
     try:
         cursor = conexion.cursor()
@@ -94,7 +94,7 @@ def listarProductos():
                 Producto p
                 LEFT JOIN productostock ps ON p.idProductoStock = ps.id
                 LEFT JOIN proveedor prov ON p.idProveedor = prov.idProveedor
-        """)  # Consulta para seleccionar todos los productos con información extendida
+        WHERE p.estado = 1""")  # Consulta para seleccionar todos los productos con información extendida
         productos = cursor.fetchall()  # Recupera todos los registros de la consulta
         
         return productos
@@ -115,7 +115,7 @@ def listarCondicionesTabla_Productos(where):
         return []
     
     listarProductos = []
-    sql = f'SELECT codigo, nombre, precioTotal, stock FROM productostock {where}'
+    sql = f'SELECT codigo, nombre, precioTotal, stock FROM productostock WHERE estado = 1 AND {where}'
 
     try:
         cursor = conexion.cursor()
@@ -164,7 +164,7 @@ def listarProductos_En_Venta():
     
     try:
         cursor = conexion.cursor()
-        cursor.execute("SELECT codigo, nombre, precioTotal, stock FROM productostock")  # Consulta para seleccionar todos los productos
+        cursor.execute("SELECT codigo, nombre, precioTotal, stock FROM productostock WHERE estado = 1 ")  # Consulta para seleccionar todos los productos
         productos = cursor.fetchall()  # Recupera todos los registros de la consulta
         
         return productos
@@ -219,19 +219,13 @@ def guardarProducto(producto, nombreProveedor):
         return
     
     sql = f"""INSERT INTO Producto 
-            (codigo, 
-            cantidadStock, 
-            precio, 
-            fechaIngreso, 
-            idProductoStock, 
-            idProveedor) 
-            VALUES
+            (codigo, cantidadStock, precio, fechaIngreso, idProductoStock, idProveedor, estado) VALUES
             ('{producto.codigo}', 
             {producto.cantidadStock}, 
             {producto.precio}, 
             '{producto.fechaIngreso}', 
             (SELECT id FROM productostock WHERE codigo= '{producto.codigo}'),
-            (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}'))"""
+            (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}', 1))"""
     
     try:
         cursor = conexion.cursor()

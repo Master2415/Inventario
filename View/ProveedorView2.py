@@ -12,13 +12,13 @@ class Frame_Proveedor(tk.Frame):
         self.config(bg='#f0f0f0')  # Color de fondo del frame principal
         self.pack(fill='both', expand=True)
         self.idProveedor = None 
-        self.mostrar_formulario_agregar()
+        self.frameBuscar()
         self.create_table()
         self.deshabilitar()
         self.cargar_productos()
         self.btnBuscar.config(command=self.buscarProducto)  # Asignar el método de búsqueda al botón
 
-    def mostrar_formulario_agregar(self):
+    def frameBuscar(self):
         self.buscar_frame = tk.Frame(self, bg='#f0f0f0')
         self.buscar_frame.pack(pady=10)
 

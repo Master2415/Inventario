@@ -4,6 +4,7 @@ from View.ClienteView import Frame_Cliente
 from View.VentaView import Frame_Venta
 from View.ProveedorView2 import Frame_Proveedor
 from View.StockView import Frame_Stock
+from View.AdminView import Frame_Admin
 
 class Aplicacion(tk.Tk):
     def __init__(self):
@@ -40,6 +41,10 @@ class Aplicacion(tk.Tk):
         self.btnVenta = tk.Button(self.frame_sidebar, text="Stock", command=self.mostrarStock)
         self.btnVenta.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnVenta.pack(fill='x', pady=7, padx=5)
+
+        self.btnAdmin = tk.Button(self.frame_sidebar, text="Administrador", command=self.mostrarAdmin)
+        self.btnAdmin.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
+        self.btnAdmin.pack(fill='x', pady=7, padx=5)
 
         # Botón de salir en la parte inferior de la barra lateral
         self.btnSalir = tk.Button(self.frame_sidebar, text="Salir", command=self.salir)
@@ -91,6 +96,15 @@ class Aplicacion(tk.Tk):
          # Mostrar la vista de productos en el marco principal
         frame_Stock = Frame_Stock(self.frame_main, width=1080, height=720)
         frame_Stock.pack(fill='both', expand=True)
+
+    def mostrarAdmin(self):
+        # Limpiar el contenido anterior del marco principal
+        for widget in self.frame_main.winfo_children():
+            widget.destroy()
+        
+         # Mostrar la vista de productos en el marco principal
+        frame_Admin = Frame_Admin(self.frame_main, width=1080, height=720)
+        frame_Admin.pack(fill='both', expand=True)
 
         
     def salir(self):

@@ -14,11 +14,11 @@ class Frame_Stock(tk.Frame):
         self.config(bg='#f0f0f0')
         self.pack(fill='both', expand=True)
         self.idStock = None
-        self.mostrar_formulario_agregar()
+        self.frameBuscar()
         self.create_table()
         self.btnBuscar.config(command=self.buscarProducto)
 
-    def mostrar_formulario_agregar(self):
+    def frameBuscar(self):
         self.buscar_frame = tk.Frame(self, bg='#f0f0f0')
         self.buscar_frame.pack(pady=10)
 

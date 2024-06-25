@@ -21,7 +21,7 @@ class DetalleVentaView(tk.Toplevel):
             self.listaDetalleVenta = listaDetalleVenta(self.idVenta)
             self.tree_detalle = ttk.Treeview(self, columns=("Cantidad", "Precio Unitario", "Subtotal", "ID Venta", "Código Producto"), show="headings", selectmode="browse")
             self.tree_detalle.heading("Cantidad", text="Cantidad en Kg")
-            self.tree_detalle.heading("Precio Unitario", text="Precio Unitario")
+            self.tree_detalle.heading("Precio Unitario", text="Precio por Kg")
             self.tree_detalle.heading("Subtotal", text="Subtotal")
             self.tree_detalle.heading("ID Venta", text="ID Venta")
             self.tree_detalle.heading("Código Producto", text="Código Producto")

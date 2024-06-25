@@ -22,7 +22,7 @@ class EmpleadoView(tk.Frame):
 
     def frameBuscar(self):
         self.buscar_frame = tk.Frame(self, bg='#BBBBBB')
-        self.buscar_frame.pack(pady=10)
+        self.buscar_frame.pack(pady=10, fill='x', padx=20,)
 
         self.svBuscar = tk.StringVar()
         self.entryBuscar = tk.Entry(self.buscar_frame, textvariable=self.svBuscar)

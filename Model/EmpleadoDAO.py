@@ -76,7 +76,8 @@ def editarEmpleado(empleado, idEmpleado, rol):
     sql_empleado = f"""UPDATE empleado SET
                         horasTrabajadas = {empleado.horas_trabajadas},
                         fechaContrato = '{empleado.fecha_contrato}',
-                        Rol_idRol = (SELECT idrol FROM rol WHERE nombreRol = '{rol}')
+                        Rol_idRol = (SELECT idrol FROM rol WHERE nombreRol = '{rol}'),
+                        estado = 1
                     WHERE idEmpleado = {idEmpleado}"""
     
     try:

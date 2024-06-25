@@ -2,6 +2,25 @@ from tkinter import messagebox
 from mysql.connector import Error
 from Conexion.Conexion import conexionBD
 
+def obtener_Users_combobox():
+    try:
+        connection = conexionBD()
+        if connection:
+            cursor = connection.cursor()
+            cursor.execute("SELECT correo FROM usuario where estado = 1")    
+            resultados = cursor.fetchall()
+            connection.close()
+            
+            lista_Users = [row[0] for row in resultados]
+            return lista_Users
+        else:
+            return []  # Devolver una lista vacía si no se puede conectar a la base de datos
+
+    except Exception as e:
+        print(f"Error al obtener Roles: {e}")
+        return []  # Manejar errores devolviendo una lista vacía
+
+
 def eliminarUsuario(idUsuario):
     conexion = conexionBD()
     if conexion is None:

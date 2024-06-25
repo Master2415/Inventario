@@ -36,7 +36,7 @@ def listaDetalleVenta(idVenta):
     try:
         cursor = conexion.cursor()
         cursor.execute("""
-            SELECT dv.id, dv.cantidad, dv.precio, dv.subTotal, dv.Venta_idVenta, p.codigo 
+            SELECT dv.id, dv.cantidad, dv.precio, dv.subTotal, p.nombre, p.codigo 
             FROM detalleventa dv
             JOIN productostock p ON dv.producto_idProducto = p.id
             WHERE dv.Venta_idVenta = %s

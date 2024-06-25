@@ -5,6 +5,8 @@ from View.DetalleVentaView import *
 from Model.ProductoDAO import *
 from Model.VentaDAO import *
 from Model.ClienteDao import buscar_y_guardar_cedula, obtener_id_por_cedula
+from Model.UsuarioDAO import obtener_Users_combobox
+
 
 class Frame_Venta(tk.Frame):
     def __init__(self, root, width=1450, height=720):
@@ -17,10 +19,12 @@ class Frame_Venta(tk.Frame):
         self.inventario = {}
 
         # Configuración inicial
+        
         self.botones()
         self.cargarTablaProductos()
         self.cargarTablaVentas()
         self.configurar_carrito()
+        self.listaUsuarios()
 
     def botones(self):
         self.svBuscar = tk.StringVar()
@@ -96,14 +100,14 @@ class Frame_Venta(tk.Frame):
 
     def cargarTablaVentas(self, where=""):
         self.listaVentas = listarVentas()
-
+    
         frame_tablaVentas = tk.Frame(self)
         frame_tablaVentas.grid(column=1, row=3, columnspan=6, sticky='nsew', padx=10, pady=10)
 
         label_ventas = tk.Label(frame_tablaVentas, text="Ventas", font=('Arial', 16, 'bold'))
         label_ventas.pack(side='top')
 
-        self.tablaVentas = ttk.Treeview(frame_tablaVentas, columns=('idVenta', 'total', 'fecha'), show='headings')
+        self.tablaVentas = ttk.Treeview(frame_tablaVentas, columns=('idVenta', 'total', 'fecha', 'Cajero', 'Cedula Cliente'), show='headings')
         scrollbar = ttk.Scrollbar(frame_tablaVentas, orient='vertical', command=self.tablaVentas.yview)
         self.tablaVentas.configure(yscroll=scrollbar.set)
         self.tablaVentas.pack(side='left', fill='both', expand=True)
@@ -112,17 +116,23 @@ class Frame_Venta(tk.Frame):
         self.tablaVentas.heading('idVenta', text='ID', anchor='w')
         self.tablaVentas.heading('total', text='Total', anchor='w')
         self.tablaVentas.heading('fecha', text='Fecha', anchor='w')
+        self.tablaVentas.heading('Cajero', text='Cajero', anchor='w')
+        self.tablaVentas.heading('Cedula Cliente', text='Cedula Cliente', anchor='w')
 
-        self.tablaVentas.column('idVenta', anchor='w', width=100)
-        self.tablaVentas.column('total', anchor='w', width=150)
-        self.tablaVentas.column('fecha', anchor='w', width=150)
+        self.tablaVentas.column('idVenta', anchor='w', width=50)
+        self.tablaVentas.column('total', anchor='w', width=100)
+        self.tablaVentas.column('fecha', anchor='w', width=170)
+        self.tablaVentas.column('Cajero', anchor='w', width=120)
+        self.tablaVentas.column('Cedula Cliente', anchor='w', width=120)
 
         for venta in self.listaVentas:
             id_venta = venta[0]
             total = f"{venta[1]:,.2f}"  # Formatear total a dos decimales
             fecha = venta[2]
+            Cajero = venta[3]
+            Cedula = venta[4]
 
-            self.tablaVentas.insert('', 'end', values=(id_venta, total, fecha))
+            self.tablaVentas.insert('', 'end', values=(id_venta, total, fecha, Cajero, Cedula))
 
 
     def configurar_carrito(self):
@@ -138,6 +148,17 @@ class Frame_Venta(tk.Frame):
         self.tree_carrito.heading("cantidad", text="Cantidad")
         self.tree_carrito.heading("precio", text="Precio")
         self.tree_carrito.pack(expand=True, fill='both')
+
+        self.frame_usuario = tk.Frame(self)
+        self.frame_usuario.grid(column=0, row=2, sticky='ew', padx=10, pady=10)
+
+        self.lblcaja = tk.Label(self.frame_usuario, text='Cajero')
+        self.lblcaja.config(font=('ARIAl',15,'bold'), bg='#f0f0f0')
+        self.lblcaja.grid(column=0, row=0, padx=10, pady=5)
+
+        self.boxUser = ttk.Combobox(self.frame_usuario, state='readonly')
+        self.boxUser.config(width=40, font=('Arial', 12))
+        self.boxUser.grid(column=1, row=0, padx=10, pady=5, columnspan=2)
 
         frame_botones = tk.Frame(self)
         frame_botones.grid(column=0, row=3, sticky='ew', padx=10, pady=10)
@@ -163,6 +184,15 @@ class Frame_Venta(tk.Frame):
 
         self.lbltipo = tk.Label(frame_botones_up, text='Cedula del Cliente', font=('ARIAL', 15, 'bold'))
         self.lbltipo.grid(column=0, row=0, padx=10, pady=5)
+
+    def listaUsuarios(self):
+        try:
+            lista_user = obtener_Users_combobox()
+            self.boxUser['values'] = lista_user
+            if lista_user:
+                self.boxUser.current(0)
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo cargar los Cargos: {e}")
 
     def quitar_al_carrito(self):
         selected_item = self.tree_carrito.focus()
@@ -227,8 +257,7 @@ class Frame_Venta(tk.Frame):
         buscar_y_guardar_cedula(self.svCedula.get())   
         # Obtener el ID del cliente por su cédula
         cliente_id = obtener_id_por_cedula(self.svCedula.get())
-        self.usuario = 1
-        # Guardar la venta en la base de datos
+        self.usuario = self.boxUser.get()
         self.guardar_Venta(total, self.usuario, cliente_id, detalles_venta)
         # Recargar la tabla de productos y ventas para reflejar los cambios en el stock y las ventas
         self.cargarTablaProductos()

@@ -7,26 +7,25 @@ def guardarVenta(venta):
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
-    sql = f"""INSERT INTO venta(total, fecha, usuario_id, cliente_id) VALUES
-            ({venta.total}, '{venta.fecha}', {venta.usuario_id}, {venta.cliente_id}) """
+    sql = """INSERT INTO venta(total, fecha, usuario_id, cliente_id) VALUES
+             (%s, %s, (SELECT idusuario FROM usuario WHERE correo = %s), %s)"""
 
     try:
         cursor = conexion.cursor()
-        cursor.execute(sql)  # Ejecuta la consulta SQL utilizando el cursor de la conexión
+        cursor.execute(sql, (venta.total, venta.fecha, venta.usuario_id, venta.cliente_id))
         conexion.commit()  # Asegura que los cambios se guarden en la base de datos
-        title = 'Registrar Venta'  
-        mensaje = 'Venta Registrado Exitosamente'  
-        #messagebox.showinfo(title, mensaje) 
+        title = 'Registrar Venta'
+        mensaje = 'Venta Registrada Exitosamente'
+        messagebox.showinfo(title, mensaje) 
 
     except Exception as e:
         title = 'Registrar Venta'
-        mensaje = f'Error al Registrar el Venta: {e}'
+        mensaje = f'Error al Registrar la Venta: {e}'
         messagebox.showinfo(title, mensaje)
-    
     
     finally:
         cursor.close()
-        conexion.close() 
+        conexion.close()
 
 
 def listarVentas():
@@ -37,7 +36,24 @@ def listarVentas():
     
     try:
         cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM venta") 
+        cursor.execute("""
+                        SELECT 
+                            v.idVenta, 
+                            v.total, 
+                            v.fecha, 
+                            u.correo AS correo_usuario, 
+                            p.cedula AS cedula_cliente
+                        FROM 
+                            venta v
+                        LEFT JOIN 
+                            usuario u ON v.usuario_id = u.idusuario
+                        LEFT JOIN 
+                            cliente c ON v.cliente_id = c.id
+                        LEFT JOIN 
+                            persona p ON c.id = p.id
+                        WHERE 
+                            DATE(v.fecha) = CURDATE();
+                    """) 
         ventas = cursor.fetchall() 
         
         return ventas
@@ -49,6 +65,7 @@ def listarVentas():
     finally:
         cursor.close()
         conexion.close()
+
 
 class Venta:
     def __init__(self, total, fecha, usuario_id, cliente_id):

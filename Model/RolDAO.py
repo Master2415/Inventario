@@ -1,5 +1,4 @@
 from tkinter import messagebox
-from mysql.connector import Error
 from Conexion.Conexion import conexionBD
 
 

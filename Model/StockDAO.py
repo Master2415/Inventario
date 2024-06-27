@@ -127,29 +127,45 @@ def guardarProStock(producto):
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
+    precioTotal = str(producto.precioTotal).replace(',', '')
+    precio_neto = str(producto.precio_neto).replace(',', '')
+
+    # SQL para verificar si el código ya existe
+    sql_verificar_codigo = "SELECT COUNT(*) FROM productoStock WHERE codigo = %s"
+    
+    # SQL para verificar si el nombre ya existe
+    sql_verificar_nombre = "SELECT COUNT(*) FROM productoStock WHERE nombre = %s"
+    
     # SQL para insertar en la tabla productoStock
-    sql_productoStock = f"""INSERT INTO productoStock (codigo, nombre, tipo, utilidad, iva, precioTotal,stock, precio_neto, estado) VALUES
-                            ('{producto.codigo}', 
-                            '{producto.nombre}', 
-                            '{producto.tipo}', 
-                            {producto.utilidad}, 
-                            {producto.iva}, 
-                            {producto.precioTotal}, 
-                            0.0,
-                            {producto.precio_neto},
-                            1)"""
+    sql_productoStock = """INSERT INTO productoStock (codigo, nombre, tipo, utilidad, iva, precioTotal, stock, precio_neto, estado) VALUES
+                            (%s, %s, %s, %s, %s, %s, %s, %s, %s)"""
     
     try:
         cursor = conexion.cursor()
-        cursor.execute(sql_productoStock)
+        
+        # Verificar si el código ya existe
+        cursor.execute(sql_verificar_codigo, (producto.codigo,))
+        resultado_codigo = cursor.fetchone()
+        
+        if resultado_codigo[0] > 0:
+            messagebox.showinfo("Registrar Producto", "El código del producto ya existe. No se puede guardar.")
+            return
+        
+        # Verificar si el nombre ya existe
+        cursor.execute(sql_verificar_nombre, (producto.nombre,))
+        resultado_nombre = cursor.fetchone()
+        
+        if resultado_nombre[0] > 0:
+            messagebox.showinfo("Registrar Producto", "El nombre del producto ya existe. No se puede guardar.")
+            return
+        
+        # Ejecutar la inserción si ni el código ni el nombre existen
+        cursor.execute(sql_productoStock, (producto.codigo, producto.nombre, producto.tipo, producto.utilidad, producto.iva, precioTotal, 0.0, precio_neto, 1))
         conexion.commit() # Asegurar que los cambios se guarden en la base de datos
-        title = 'Registrar Producto'
-        mensaje = 'Producto Registrado Exitosamente'
-        messagebox.showinfo(title, mensaje)
+        messagebox.showinfo("Registrar Producto", "Producto Registrado Exitosamente")
+        
     except Exception as e:
-        title = 'Registrar Producto'
-        mensaje = f'Error al Registrar el Producto: {e}'
-        messagebox.showinfo(title, mensaje)
+        messagebox.showinfo("Registrar Producto", f'Error al Registrar el Producto: {e}')
     finally:
         cursor.close()
         conexion.close()

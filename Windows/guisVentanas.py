@@ -7,6 +7,7 @@ from View.VentaView import Frame_Venta
 from View.ProveedorView2 import Frame_Proveedor
 from View.StockView import Frame_Stock
 from View.AdminView import Frame_Admin
+from View.CajaView import Frame_Caja
 
 class Aplicacion(tk.Tk):
     def __init__(self):
@@ -45,7 +46,12 @@ class Aplicacion(tk.Tk):
         tk.Button(self.frame_login, text="Iniciar sesión", command=self.iniciar_sesion, width=20, font=('Arial', 12, 'bold'), fg='#DAD5D6', bg='#001CCF').grid(row=2, columnspan=2, pady=10)
 
         # Botones de la barra lateral con estilo
-        self.btnProductos = tk.Button(self.frame_sidebar, text="Productos", command=self.mostrarProductos)
+        self.btnCaja = tk.Button(self.frame_sidebar, text="Caja", command=self.mostrarCaja)
+        self.btnCaja.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
+        self.btnCaja.pack(fill='x', pady=5, padx=5)
+    
+        
+        self.btnProductos = tk.Button(self.frame_sidebar, text="Entrada de Productos", command=self.mostrarProductos)
         self.btnProductos.config(width=20, font=('ARIAL',12,'bold'), fg='#DAD5D6', bg='#CF0000')
         self.btnProductos.pack(fill='x', pady=5, padx=5)
     
@@ -118,6 +124,15 @@ class Aplicacion(tk.Tk):
         cursor.close()
         conexion.close()
 
+    def mostrarCaja(self):
+        # Limpiar el contenido anterior del marco principal
+        for widget in self.frame_main.winfo_children():
+            widget.destroy()
+
+        # Mostrar la vista de productos en el marco principal
+        frame_caja = Frame_Caja(self.frame_main, width=1080, height=720)
+        frame_caja.pack(fill='both', expand=True)
+   
     def mostrarProductos(self):
         # Limpiar el contenido anterior del marco principal
         for widget in self.frame_main.winfo_children():

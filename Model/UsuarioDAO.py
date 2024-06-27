@@ -172,14 +172,21 @@ def guardarUsuario(usuario, cedula):
             if empleado_result:
                 idEmpleado = empleado_result[0]
                 
-                # Insertar el nuevo usuario
-                cursor.execute("""
-                    INSERT INTO usuario (correo, contrasena, estado, idEmpleado)
-                    VALUES (%s, %s, %s, %s)
-                """, (usuario.correo, usuario.contrasena, 1, idEmpleado))
+                # Verificar si el correo ya existe
+                cursor.execute("SELECT COUNT(*) FROM usuario WHERE correo = %s", (usuario.correo,))
+                correo_result = cursor.fetchone()
                 
-                conexion.commit()  # Asegura que los cambios se guarden en la base de datos
-                messagebox.showinfo('Registrar el usuario', 'Usuario registrado exitosamente')
+                if correo_result[0] > 0:
+                    messagebox.showwarning('Registrar el usuario', 'El correo proporcionado ya está registrado')
+                else:
+                    # Insertar el nuevo usuario
+                    cursor.execute("""
+                        INSERT INTO usuario (correo, contrasena, estado, idEmpleado)
+                        VALUES (%s, %s, %s, %s)
+                    """, (usuario.correo, usuario.contrasena, 1, idEmpleado))
+                    
+                    conexion.commit()  # Asegura que los cambios se guarden en la base de datos
+                    messagebox.showinfo('Registrar el usuario', 'Usuario registrado exitosamente')
             else:
                 messagebox.showwarning('Registrar el usuario', 'No se encontró un empleado asociado con la cédula proporcionada')
         else:
@@ -191,6 +198,7 @@ def guardarUsuario(usuario, cedula):
     finally:
         cursor.close()
         conexion.close()
+
 
 
 class Usuario:

@@ -33,14 +33,6 @@ class Frame_Stock(tk.Frame):
         self.btnBuscar.grid(column=1, row=0, padx=10, pady=5)
 
     def create_table(self, where=""):
-        if hasattr(self, 'tablaProductosStock'):
-            self.tablaProductosStock.delete(*self.tablaProductosStock.get_children())
-
-        if len(where) > 0:
-            self.listaProductosStock = listarStockWhere(where)
-        else:
-            self.listaProductosStock = listarStock()
-
         if not hasattr(self, 'tabla_frame'):
             self.tabla_frame = tk.Frame(self)
             self.tabla_frame.pack(fill='x', expand=False)
@@ -68,23 +60,37 @@ class Frame_Stock(tk.Frame):
             self.tablaProductosStock.column('#4', anchor=tk.W, width=150)
             self.tablaProductosStock.column('#5', anchor=tk.W, width=150)
             self.tablaProductosStock.column('#6', anchor=tk.W, width=150)
-            self.tablaProductosStock.column('#7', anchor=tk.W, width=150)
+            self.tablaProductosStock.column('#7', anchor=tk.W, width=190)
             self.tablaProductosStock.column('#8', anchor=tk.W, width=150)
 
-            for p in self.listaProductosStock:
-                self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]), tags=('evenrow',))
+        self.update_table(where)
+
+    def update_table(self, where=""):
+        for row in self.tablaProductosStock.get_children():
+            self.tablaProductosStock.delete(row)
+
+        if len(where) > 0:
+            self.listaProductosStock = listarStockWhere(where)
+        else:
+            self.listaProductosStock = listarStock()
+
+        for p in self.listaProductosStock:
+            Total = "{:,.2f}".format(p[6]) 
+            Neto = "{:,.2f}".format(p[8]) 
+            self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], Total, p[7], Neto), tags=('evenrow',))
 
         # Botones debajo de la tabla
-        self.btn_frame = tk.Frame(self, bg='#f0f0f0')
-        self.btn_frame.pack(pady=(10, 20), anchor='n')
+        if not hasattr(self, 'btn_frame'):
+            self.btn_frame = tk.Frame(self, bg='#f0f0f0')
+            self.btn_frame.pack(pady=(10, 20), anchor='n')
 
-        self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Registrsos del producto', command=self.ver_RegistrosEntrada)
-        self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
-        self.btnRegistroEntrda.grid(column=0, row=0, padx=10, pady=5)
+            self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Registrsos del producto', command=self.ver_RegistrosEntrada)
+            self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
+            self.btnRegistroEntrda.grid(column=0, row=0, padx=10, pady=5)
 
-        self.btnProveedores = tk.Button(self.btn_frame, text='Ver Proveedores', command=self.ver_proveedor)
-        self.btnProveedores.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
-        self.btnProveedores.grid(column=1, row=0, padx=10, pady=5)
+            self.btnProveedores = tk.Button(self.btn_frame, text='Ver Proveedores', command=self.ver_proveedor)
+            self.btnProveedores.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
+            self.btnProveedores.grid(column=1, row=0, padx=10, pady=5)
 
 
         if not hasattr(self, 'botones_frame'):
@@ -171,21 +177,31 @@ class Frame_Stock(tk.Frame):
     
 
     def agregarProducto(self):
-        precio_neto = float(self.svPrecioNeto.get())
-        utilidad = float(self.svUtilidad.get())
-        iva = float(self.svIVA.get())
-
-        self.precioTotal = precio_neto * (1 + utilidad + iva)
-
-        productoStock = ProductoStock(self.svcodigo.get(), self.svNombre.get(), self.svTipo.get(), 
-                                      self.svUtilidad.get(), self.svIVA.get(), self.precioTotal, self.svPrecioNeto.get())
-          
+        precio_neto = float(self.svPrecioNeto.get().replace(',', ''))
+        utilidad = float(self.svUtilidad.get().replace(',', '')) 
+        iva = float(self.svIVA.get().replace(',', '')) 
+        
+        self.precioTotal = precio_neto * (1 + (utilidad/100) + (iva/100))
+        
+        productoStock = ProductoStock(
+            self.svcodigo.get(), 
+            self.svNombre.get(), 
+            self.svTipo.get(), 
+            self.svUtilidad.get(), 
+            self.svIVA.get(), 
+            self.precioTotal, 
+            precio_neto
+        )
+        
         if self.idStock is None:
             guardarProStock(productoStock)
         else:
             editarProStock(self.idStock, productoStock)
-     
+        
         self.create_table()
+        self.deshabilitar()
+            
+
 
 
     def habilitar(self):
@@ -341,7 +357,7 @@ class Registro(tk.Toplevel):
         self.listaProductos = listarRegistroProductos(self.idProducto)
 
         for p in self.listaProductos:
-            precio_formateado = "{:,.2f}".format(p[5])  # Asumiendo que p[5] es el precio
+            precio_formateado = "{:,.2f}".format(p[5]) 
             self.tablaProducto.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], precio_formateado, p[6], p[7]), tags=('evenrow',))
 
 

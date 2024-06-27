@@ -89,11 +89,10 @@ class Frame_Venta(tk.Frame):
         for producto in self.listaProductos:
             codigo = producto[0]
             nombre = producto[1]
-            precio = producto[2]
+            precio = "{:,.2f}".format(producto[2])
             stock = producto[3]
 
-            # Formatear el stock con dos decimales
-            stock_formateado = f"{stock:.2f}"
+            stock_formateado = f"{stock:.2f}"# Formatear el stock con dos decimales
 
             self.tablaProductos.insert('', 'end', values=(codigo, nombre, precio, stock_formateado))
 
@@ -216,15 +215,24 @@ class Frame_Venta(tk.Frame):
             producto = self.tablaProductos.item(selected_item)['values']
             try:
                 cantidad = float(self.svCantidad.get())
-                precio_unitario = float(producto[2])  # Convertir el precio a float
+                precio_unitario = float(producto[2].replace(',', ''))  # Convertir el precio a float
                 precio_total = cantidad * precio_unitario
-                # Formatear el código del producto para conservar los ceros a la izquierda
                 codigo_producto = str(producto[0])  # Asume que el código debe tener al menos 3 dígitos
-                # Insertar el producto en el carrito con los valores formateados
                 self.tree_carrito.insert("", tk.END, values=(codigo_producto, producto[1], cantidad, round(precio_total, 2)))
-        
+
+                # Actualizar el total del carrito
+                self.actualizar_total_carrito()
+            
             except ValueError:
                 self.label_status.config(text="Por favor, ingrese un número válido")
+
+    def actualizar_total_carrito(self):
+        total = 0
+        for child in self.tree_carrito.get_children():
+            item = self.tree_carrito.item(child)
+            total += float(item['values'][3])  # Sumar el precio total de cada producto
+        self.label_total.config(text=f"Total de la venta: {total:.2f}")
+
 
 
     def generar_venta(self):

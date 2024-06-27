@@ -45,13 +45,14 @@ def guardarVenta(venta):
     if conexion is None:
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
+    ventaTotal = str(venta.total).replace(',', '')
     
     sql = """INSERT INTO venta(total, fecha, usuario_id, cliente_id) VALUES
              (%s, %s, (SELECT idusuario FROM usuario WHERE correo = %s), %s)"""
 
     try:
         cursor = conexion.cursor()
-        cursor.execute(sql, (venta.total, venta.fecha, venta.usuario_id, venta.cliente_id))
+        cursor.execute(sql, (ventaTotal, venta.fecha, venta.usuario_id, venta.cliente_id))
         conexion.commit()  # Asegura que los cambios se guarden en la base de datos
         title = 'Registrar Venta'
         mensaje = 'Venta Registrada Exitosamente'

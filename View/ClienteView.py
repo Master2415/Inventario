@@ -3,8 +3,8 @@ from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
 from tkcalendar import *
-from datetime import datetime
 from Model.ClienteDao import *
+from Model.VentaDAO import listarVentasCliente
 
 class Frame_Cliente(tk.Frame):
 
@@ -90,14 +90,17 @@ class Frame_Cliente(tk.Frame):
             self.btnEditar.config(width=20, font=('ARIAL',12,'bold'), fg='#ffffff', bg='#007ACC')
             self.btnEditar.grid(column=1, row=0, padx=10, pady=5)
 
+            self.btnRegistroEntrda = tk.Button(self.botones_frame, text='Compras Realizadas', command=self.comprasHechas)
+            self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
+            self.btnRegistroEntrda.grid(column=2, row=0, padx=10, pady=5)
+
             self.btnEliminar = tk.Button(self.botones_frame, text='Eliminar Cliente', command=self.eliminarPersona)
             self.btnEliminar.config(width=20, font=('ARIAL',12,'bold'), fg='#ffffff', bg='#D9534F')
-            self.btnEliminar.grid(column=2, row=0, padx=10, pady=5)
+            self.btnEliminar.grid(column=3, row=0, padx=10, pady=5)
 
         if not hasattr(self, 'formulario_frame'):
             self.formulario_frame = tk.Frame(self, bg='#BBBBBB')
             self.formulario_frame.pack(fill='x', padx=20, pady=10)
-
 
             self.lblcedula = tk.Label(self.formulario_frame, text='Cedula')
             self.lblcedula.config(font=('ARIAl',15,'bold'), bg='#BBBBBB')
@@ -281,16 +284,72 @@ class Frame_Cliente(tk.Frame):
         self.btnCancelar.config(state='disabled')  
 
     def buscarCliente(self):
-        # Obtener el texto del Entry
         texto_busqueda = self.svBuscar.get()
-
-        # Verificar si se proporcionó algún texto de búsqueda
         if texto_busqueda:
-            # Crear la condición WHERE
             where = "WHERE cedula LIKE '%" + texto_busqueda + "%' OR nombre LIKE '%" + texto_busqueda + "%' OR Ciudad LIKE '%" + texto_busqueda + "%' OR tipo_cliente LIKE '%" + texto_busqueda + "%'"
 
         else:
             where = ""  # Si no se proporcionó ninguna entrada, no se aplica ninguna condición WHERE
-
-        # Llamar a la función para obtener los productos con las condiciones dadas
         self.tablaClientes(where)
+
+    def comprasHechas(self):
+        self.idCliente = self.get_selected_product_id()
+        if self.idCliente:
+            comprasRealizadas(self, self.idCliente)
+        else:
+            messagebox.showerror("Error", "Seleccione un Cliente")
+    
+    def get_selected_product_id(self):
+        selected_item = self.tabla.selection()
+        if selected_item:
+            return self.tabla.item(selected_item)['text']
+        else:
+            return None
+    
+class comprasRealizadas(tk.Toplevel):
+    def __init__(self, parent, idCliente):
+        super().__init__(parent)
+        self.parent = parent
+        self.idCliente = idCliente
+        self.title('Compras Realizadas')
+        self.resizable(0, 0)
+        self.config(bg='#f0f0f0')
+        self.cargarTablaVentas()
+        
+
+
+    def cargarTablaVentas(self):
+        self.listaVentas = listarVentasCliente(self.idCliente)
+    
+        frame_tablaVentas = tk.Frame(self)
+        frame_tablaVentas.grid(column=1, row=3, columnspan=6, sticky='nsew', padx=10, pady=10)
+
+        label_ventas = tk.Label(frame_tablaVentas, text="Ventas", font=('Arial', 16, 'bold'))
+        label_ventas.pack(side='top')
+
+        self.tablaVentas = ttk.Treeview(frame_tablaVentas, columns=('idVenta', 'total', 'fecha', 'Cajero', 'Cedula Cliente'), show='headings')
+        scrollbar = ttk.Scrollbar(frame_tablaVentas, orient='vertical', command=self.tablaVentas.yview)
+        self.tablaVentas.configure(yscroll=scrollbar.set)
+        self.tablaVentas.pack(side='left', fill='both', expand=True)
+        scrollbar.pack(side='right', fill='y')
+
+        self.tablaVentas.heading('idVenta', text='ID', anchor='w')
+        self.tablaVentas.heading('total', text='Total', anchor='w')
+        self.tablaVentas.heading('fecha', text='Fecha', anchor='w')
+        self.tablaVentas.heading('Cajero', text='Cajero', anchor='w')
+        self.tablaVentas.heading('Cedula Cliente', text='Cedula Cliente', anchor='w')
+
+        self.tablaVentas.column('idVenta', anchor='w', width=50)
+        self.tablaVentas.column('total', anchor='w', width=100)
+        self.tablaVentas.column('fecha', anchor='w', width=170)
+        self.tablaVentas.column('Cajero', anchor='w', width=120)
+        self.tablaVentas.column('Cedula Cliente', anchor='w', width=120)
+
+        for venta in self.listaVentas:
+            id_venta = venta[0]
+            total = f"{venta[1]:,.2f}"  # Formatear total a dos decimales
+            fecha = venta[2]
+            Cajero = venta[3]
+            Cedula = venta[4]
+
+            self.tablaVentas.insert('', 'end', values=(id_venta, total, fecha, Cajero, Cedula))

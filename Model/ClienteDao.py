@@ -1,6 +1,5 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
-import mysql.connector
 
 def obtener_id_por_cedula(cedula):
         conexion = conexionBD()

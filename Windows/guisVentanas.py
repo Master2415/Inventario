@@ -7,7 +7,6 @@ from View.VentaView import Frame_Venta
 from View.ProveedorView2 import Frame_Proveedor
 from View.StockView import Frame_Stock
 from View.AdminView import Frame_Admin
-from Model.VentaDAO import Venta
 
 class Aplicacion(tk.Tk):
     def __init__(self):

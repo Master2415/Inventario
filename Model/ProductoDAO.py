@@ -1,6 +1,44 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+def listarRegistroProductos(idProducto):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return []
+    
+    try:
+        cursor = conexion.cursor()
+        query = """
+            SELECT 
+                p.idProducto, 
+                p.codigo, 
+                ps.nombre AS nombre_productostock, 
+                ps.tipo AS tipo_productostock, 
+                p.cantidadStock, 
+                p.precio, 
+                p.fechaIngreso, 
+                prov.nombre AS nombre_proveedor
+            FROM 
+                Producto p
+                LEFT JOIN productostock ps ON p.idProductoStock = ps.id
+                LEFT JOIN proveedor prov ON p.idProveedor = prov.idProveedor
+            WHERE 
+            p.estado = 1 AND p.idProductoStock = %s """
+        
+        cursor.execute(query, (idProducto,))
+        proveedores = cursor.fetchall()  # Recupera todos los registros de la consulta
+        
+        return proveedores
+
+    except Exception as e:
+        messagebox.showerror("Error", f"No se pudo listar los Proveedores: {e}")
+        return []
+
+    finally:
+        cursor.close()
+        conexion.close()
+
 def obtener_id_por_producto(codigo):
     conexion = conexionBD()
     if conexion is None:
@@ -53,7 +91,7 @@ def listarCondiciones(where):
             Producto p
             LEFT JOIN productostock ps ON p.idProductoStock = ps.id
             LEFT JOIN proveedor prov ON p.idProveedor = prov.idProveedor
-        WHERE 1=1 {where} AND WHERE p.estado = 1"""
+        WHERE 1=1 AND {where} AND p.estado = 1"""
 
     try:
         cursor = conexion.cursor()
@@ -184,10 +222,12 @@ def editarProducto(producto, idProducto, nombreProveedor):
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
+    precio_sin_comas = str(producto.precio).replace(',', '')
+    
     sql = f"""UPDATE Producto SET 
                 codigo = '{producto.codigo}', 
                 cantidadStock = {producto.cantidadStock}, 
-                precio = {producto.precio}, 
+                precio = {precio_sin_comas}, 
                 fechaIngreso = '{producto.fechaIngreso}',
                 idProductoStock = (SELECT id FROM productostock WHERE codigo= '{producto.codigo}'),
                 idProveedor = (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}')
@@ -218,14 +258,17 @@ def guardarProducto(producto, nombreProveedor):
         messagebox.showerror("Error", "No se pudo conectar a la base de datos")
         return
     
+    precio_sin_comas = str(producto.precio).replace(',', '')
+    
     sql = f"""INSERT INTO Producto 
             (codigo, cantidadStock, precio, fechaIngreso, idProductoStock, idProveedor, estado) VALUES
             ('{producto.codigo}', 
             {producto.cantidadStock}, 
-            {producto.precio}, 
+            {precio_sin_comas}, 
             '{producto.fechaIngreso}', 
             (SELECT id FROM productostock WHERE codigo= '{producto.codigo}'),
-            (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}', 1))"""
+            (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}'), 
+            1)"""
     
     try:
         cursor = conexion.cursor()

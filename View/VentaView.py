@@ -98,7 +98,7 @@ class Frame_Venta(tk.Frame):
             self.tablaProductos.insert('', 'end', values=(codigo, nombre, precio, stock_formateado))
 
 
-    def cargarTablaVentas(self, where=""):
+    def cargarTablaVentas(self):
         self.listaVentas = listarVentas()
     
         frame_tablaVentas = tk.Frame(self)

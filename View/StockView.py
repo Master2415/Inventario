@@ -1,10 +1,10 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
-from Model.StockDAO import listarStock
 from Model.ProveedorDAO import *
 from View.ProveedorView import ProveedorView
 from Model.StockDAO import *
+from Model.ProductoDAO import listarRegistroProductos
 
 
 class Frame_Stock(tk.Frame):
@@ -16,6 +16,7 @@ class Frame_Stock(tk.Frame):
         self.idStock = None
         self.frameBuscar()
         self.create_table()
+        self.deshabilitar()
         self.btnBuscar.config(command=self.buscarProducto)
 
     def frameBuscar(self):
@@ -27,7 +28,7 @@ class Frame_Stock(tk.Frame):
         self.entryBuscar.config(width=40, font=('Arial', 15), bg='#ffffff')
         self.entryBuscar.grid(column=0, row=0, padx=10, pady=5)
 
-        self.btnBuscar = tk.Button(self.buscar_frame, text='Buscar', command=self.buscarProducto)
+        self.btnBuscar = tk.Button(self.buscar_frame, text='Buscar')
         self.btnBuscar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#007ACC')
         self.btnBuscar.grid(column=1, row=0, padx=10, pady=5)
 
@@ -70,20 +71,20 @@ class Frame_Stock(tk.Frame):
             self.tablaProductosStock.column('#7', anchor=tk.W, width=150)
             self.tablaProductosStock.column('#8', anchor=tk.W, width=150)
 
-        for p in self.listaProductosStock:
-            self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]), tags=('evenrow',))
+            for p in self.listaProductosStock:
+                self.tablaProductosStock.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8]), tags=('evenrow',))
 
         # Botones debajo de la tabla
         self.btn_frame = tk.Frame(self, bg='#f0f0f0')
         self.btn_frame.pack(pady=(10, 20), anchor='n')
 
-        self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Ingresos del producto')
+        self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Registrsos del producto', command=self.ver_RegistrosEntrada)
         self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
         self.btnRegistroEntrda.grid(column=0, row=0, padx=10, pady=5)
 
-        self.btnRegistroEntrda = tk.Button(self.btn_frame, text='Ver Proveedores', command=self.ver_proveedor)
-        self.btnRegistroEntrda.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
-        self.btnRegistroEntrda.grid(column=1, row=0, padx=10, pady=5)
+        self.btnProveedores = tk.Button(self.btn_frame, text='Ver Proveedores', command=self.ver_proveedor)
+        self.btnProveedores.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
+        self.btnProveedores.grid(column=1, row=0, padx=10, pady=5)
 
 
         if not hasattr(self, 'botones_frame'):
@@ -167,8 +168,6 @@ class Frame_Stock(tk.Frame):
             self.btnCancelar = tk.Button(self.formulario_frame, text='Cancelar', command=self.deshabilitar)
             self.btnCancelar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#D9534F', cursor='hand2')
             self.btnCancelar.grid(column=2, row=7, padx=10, pady=10)
-
-            self.deshabilitar()
     
 
     def agregarProducto(self):
@@ -230,8 +229,7 @@ class Frame_Stock(tk.Frame):
         if valor:
             where = f"codigo LIKE '%{valor}%' OR nombre LIKE '%{valor}%' OR tipo LIKE '%{valor}%'"
         else:
-            where = ""  # Si no se proporcionó ninguna entrada, no se aplica ninguna condición WHERE
-        
+            where = ""  # Si no se proporcionó ninguna entrada, no se aplica ninguna condición WHERE    
         self.create_table(where)
 
 
@@ -279,10 +277,71 @@ class Frame_Stock(tk.Frame):
         else:
             messagebox.showerror("Error", "Seleccione un producto")
 
+    def ver_RegistrosEntrada(self):
+        self.idStock = self.get_selected_product_id()
+        if self.idStock:
+            Registro(self, self.idStock)
+        else:
+            messagebox.showerror("Error", "Seleccione un producto")
+
     def get_selected_product_id(self):
         selected_item = self.tablaProductosStock.selection()
         if selected_item:
             return self.tablaProductosStock.item(selected_item)['text']
         else:
             return None
+        
+class Registro(tk.Toplevel):
+    def __init__(self, parent, idProducto):
+        super().__init__(parent)
+        self.parent = parent
+        self.idProducto = idProducto
+        self.title('Ingresos del producto')
+        self.resizable(0, 0)
+        
+        self.config(bg='#f0f0f0')
+        self.tablaProductos()
+        self.idProducto = None
+
+    def tablaProductos(self):
+        # Eliminar los elementos existentes de la tabla si ya existe
+        if hasattr(self, 'tablaProducto'):
+            self.tablaProducto.delete(*self.tablaProducto.get_children())
+        else:
+            # Si la tabla no existe, crearla junto con su frame y scrollbar
+            self.frame_tablaProducto = tk.Frame(self)
+            self.frame_tablaProducto.pack(fill='x', expand=False)
+
+            # Crear la tablaProducto con barra de desplazamiento
+            self.tablaProducto = ttk.Treeview(self.frame_tablaProducto, height=10, columns=('idProducto', 'Codigo', 'Producto', 'Tipo', 'Cant. ingresada', 'Precio', 'Fecha de Ingreso', 'Proveedor'))
+            self.scrollbar = ttk.Scrollbar(self.frame_tablaProducto, orient='vertical', command=self.tablaProducto.yview)
+            self.tablaProducto.configure(yscroll=self.scrollbar.set)
+            self.tablaProducto.pack(side='left', fill='both', expand=True)
+            self.scrollbar.pack(side='right', fill='y')
+
+            self.tablaProducto.heading('#0', text='ID')
+            self.tablaProducto.heading('#1', text='Codigo')
+            self.tablaProducto.heading('#2', text='Producto')
+            self.tablaProducto.heading('#3', text='Tipo')
+            self.tablaProducto.heading('#4', text='Cant. ingresada')
+            self.tablaProducto.heading('#5', text='Precio')
+            self.tablaProducto.heading('#6', text='Fecha de Ingreso')
+            self.tablaProducto.heading('#7', text='Proveedor')
+
+            self.tablaProducto.column("#0", anchor='w', width=100)
+            self.tablaProducto.column("#1", anchor='w', width=130)
+            self.tablaProducto.column("#2", anchor='w', width=180)
+            self.tablaProducto.column("#3", anchor='w', width=150)
+            self.tablaProducto.column("#4", anchor='w', width=150)
+            self.tablaProducto.column("#5", anchor='w', width=120)
+            self.tablaProducto.column("#6", anchor='w', width=180)
+            self.tablaProducto.column("#7", anchor='w', width=170)
+
+        
+        self.listaProductos = listarRegistroProductos(self.idProducto)
+
+        for p in self.listaProductos:
+            precio_formateado = "{:,.2f}".format(p[5])  # Asumiendo que p[5] es el precio
+            self.tablaProducto.insert('', 'end', text=p[0], values=(p[1], p[2], p[3], p[4], precio_formateado, p[6], p[7]), tags=('evenrow',))
+
 

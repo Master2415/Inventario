@@ -15,7 +15,7 @@ class Frame_Proveedor(tk.Frame):
         self.frameBuscar()
         self.create_table()
         self.deshabilitar()
-        self.cargar_productos()
+        #self.cargar_productos()
         self.btnBuscar.config(command=self.buscarProducto)  # Asignar el método de búsqueda al botón
 
     def frameBuscar(self):
@@ -109,9 +109,11 @@ class Frame_Proveedor(tk.Frame):
             self.lblCorreo.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
             self.lblCorreo.grid(column=0, row=4, padx=10, pady=5)
 
+            """
             self.lblProveedor = tk.Label(self.formulario_frame, text='Producto')
             self.lblProveedor.config(font=('Arial', 15, 'bold'), bg='#BBBBBB')
             self.lblProveedor.grid(column=0, row=5, padx=10, pady=5)
+            """
 
             # Entrys
             self.svNombre = tk.StringVar()
@@ -139,9 +141,11 @@ class Frame_Proveedor(tk.Frame):
             self.entryCorreo.config(width=40, font=('Arial', 15))
             self.entryCorreo.grid(column=1, row=4, padx=10, pady=5, columnspan=2)
 
+            """
             self.boxProductos = ttk.Combobox(self.formulario_frame, state='readonly')
             self.boxProductos.config(width=40, font=('Arial', 12))
             self.boxProductos.grid(column=1, row=5, padx=10, pady=5, columnspan=2)
+            """
 
             self.btnGuardar = tk.Button(self.formulario_frame, text='Guardar Nuevo', command=self.ingresar_proveedor)
             self.btnGuardar.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#5CB85C')
@@ -174,7 +178,8 @@ class Frame_Proveedor(tk.Frame):
             messagebox.showerror("Error", f"No se pudo cargar los proveedores: {e}")
     
     def ingresar_proveedor(self): 
-        producto_seleccionado = self.boxProductos.get()
+        #producto_seleccionado = self.boxProductos.get()
+        producto_seleccionado = None
         proveedor = Proveedor(self.svNombre.get(), self.svTipo.get(), self.svTelefono.get(), self.svDireccion.get(), self.svCorreo.get())
 
         try:

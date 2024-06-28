@@ -90,6 +90,7 @@ class Aplicacion(tk.Tk):
         self.btnVenta.config(state='normal' if estado else 'disabled')
         self.btnStock.config(state='normal' if estado else 'disabled')
         self.btnAdmin.config(state='normal' if estado else 'disabled')
+        self.btnCaja.config(state='normal' if estado else 'disabled')
 
     def iniciar_sesion(self):
         usuario = self.entry_usuario.get()

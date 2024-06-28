@@ -37,3 +37,39 @@ def listarProductosConPrecioPromedio():
     finally:
         cursor.close()
         conexion.close()
+
+def consulta_productos( fecha_inicio, fecha_fin):
+        conexion = conexionBD()
+        if conexion is None:
+            messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+            return []
+        
+        sql = f"""
+        SELECT 
+            ps.codigo, 
+            ps.nombre, 
+            SUM(dv.cantidad) AS cantidad_total, 
+            SUM(dv.subTotal) AS total_vendido
+        FROM 
+            detalleventa dv
+        JOIN 
+            productostock ps ON dv.producto_idProducto = ps.id
+        JOIN 
+            venta v ON dv.Venta_idVenta = v.idVenta
+        WHERE 
+            v.fecha BETWEEN '{fecha_inicio}' AND '{fecha_fin}' AND ps.estado = 1
+        GROUP BY 
+            ps.codigo, ps.nombre
+        """
+        
+        try:
+            cursor = conexion.cursor()
+            cursor.execute(sql)
+            productos = cursor.fetchall()
+            return productos
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo listar los productos: {e}")
+            return []
+        finally:
+            cursor.close()
+            conexion.close()

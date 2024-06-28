@@ -18,7 +18,6 @@ class Frame_Admin(tk.Frame):
         self.framebtn()
 
 
-
     def framebtn(self):
         self.btn_frame = tk.Frame(self, bg='#BBBBBB')
         self.btn_frame.pack(fill='x', padx=20, pady=10)
@@ -39,6 +38,10 @@ class Frame_Admin(tk.Frame):
         self.btnResumen.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
         self.btnResumen.grid(column=0, row=1, padx=10, pady=5)
 
+        self.btnResumenventa = tk.Button(self.btn_frame, text='Resumen Ventas', command=self.mostrarResumenVentas)
+        self.btnResumenventa.config(width=20, font=('Arial', 12, 'bold'), fg='#ffffff', bg='#E8B200')
+        self.btnResumenventa.grid(column=1, row=1, padx=10, pady=5)
+
     def mostrarRol(self):
         self._mostrar_frame(RolView)
 
@@ -50,6 +53,9 @@ class Frame_Admin(tk.Frame):
     
     def mostrarResumen(self):
         self._mostrar_frame(Frame_Resumen)
+
+    def mostrarResumenVentas(self):
+        self._mostrar_frame(Frame_ResumenVentas)
 
     def _mostrar_frame(self, FrameClass):
         # Destruir el frame actual si existe

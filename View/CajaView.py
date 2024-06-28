@@ -52,8 +52,8 @@ class Frame_Caja(tk.Frame):
             
 
         for p in self.listCaja:
-            monto1 = "{:,.2f}".format(p[3])  # Asumiendo que p[5] es el precio
-            monto2 = "{:,.2f}".format(p[4])  # Asumiendo que p[5] es el precio
+            monto1 = "{:,.2f}".format(p[3]) 
+            monto2 = "{:,.2f}".format(p[4]) 
             self.tablaCaja.insert('', 'end', text=p[0], values=(p[1], p[2], monto1, monto2, p[5]), tags=('evenrow',))
 
         # Botones debajo de la tabla
@@ -70,7 +70,7 @@ class Frame_Caja(tk.Frame):
             self.btnEditar.config(width=20, font=('ARIAL',12,'bold'), fg='#ffffff', bg='#007ACC')
             self.btnEditar.grid(column=1, row=0, padx=10, pady=5)
 
-            self.btnEliminar = tk.Button(self.botones_frame, text='Eliminar')
+            self.btnEliminar = tk.Button(self.botones_frame, text='Eliminar', command=self.eliminarCaja)
             self.btnEliminar.config(width=20, font=('ARIAL',12,'bold'), fg='#ffffff', bg='#D9534F')
             self.btnEliminar.grid(column=3, row=0, padx=10, pady=5)
 
@@ -152,16 +152,26 @@ class Frame_Caja(tk.Frame):
             editarCaja(caja, self.idCaja, self.usuario)
         
         self.tablaCajas()
+        self.deshabilitar()
+    
+    def eliminarCaja(self):
+        
+            self.idCaja = self.tablaCaja.item(self.tablaCaja.selection())['text']
+            eliminarCaja(self.idCaja)
+            
+            self.tablaCajas()
+
+        
 
     def editarCaja(self):
         try:
             # Obtengo los datos
-            self.idCaja                 = self.tabla.item(self.tabla.selection())['text'] #Trae el ID
-            self.hinicio                    = self.tabla.item(self.tabla.selection())['values'][0]
-            self.hfin                    = self.tabla.item(self.tabla.selection())['values'][1]
-            self.maper                  = self.tabla.item(self.tabla.selection())['values'][2]
-            self.mfin                 = self.tabla.item(self.tabla.selection())['values'][3]
-            self.usuario                    = self.tabla.item(self.tabla.selection())['values'][4]
+            self.idCaja                 = self.tablaCaja.item(self.tablaCaja.selection())['text'] #Trae el ID
+            self.hinicio                    = self.tablaCaja.item(self.tablaCaja.selection())['values'][0]
+            self.hfin                    = self.tablaCaja.item(self.tablaCaja.selection())['values'][1]
+            self.maper                  = self.tablaCaja.item(self.tablaCaja.selection())['values'][2]
+            self.mfin                 = self.tablaCaja.item(self.tablaCaja.selection())['values'][3]
+            self.usuario                    = self.tablaCaja.item(self.tablaCaja.selection())['values'][4]
            
             
             self.habilitar()
@@ -184,12 +194,13 @@ class Frame_Caja(tk.Frame):
         self.svHfin.set('')
         self.svMapertura.set('')
         self.svMfin.set('')
+        self.boxusuarios.set('')
 
         self.entryHinicio.config(state='normal')
         self.entryHfin.config(state='normal')
         self.entryApertura.config(state='normal')
         self.entryMfin.config(state='normal')
-        self.boxusuarios.config(state='readonly')
+        self.boxusuarios.config(state='normal')
 
         self.btnGuardar.config(state='normal')
         self.btnCancelar.config(state='normal') 
@@ -199,6 +210,7 @@ class Frame_Caja(tk.Frame):
         self.svHfin.set('')
         self.svMapertura.set('')
         self.svMfin.set('')
+        self.boxusuarios.set('')
 
         self.entryHinicio.config(state='disabled')
         self.entryHfin.config(state='disabled')

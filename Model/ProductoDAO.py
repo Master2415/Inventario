@@ -230,7 +230,8 @@ def editarProducto(producto, idProducto, nombreProveedor):
                 precio = {precio_sin_comas}, 
                 fechaIngreso = '{producto.fechaIngreso}',
                 idProductoStock = (SELECT id FROM productostock WHERE codigo= '{producto.codigo}'),
-                idProveedor = (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}')
+                idProveedor = (SELECT idProveedor FROM Proveedor WHERE nombre = '{nombreProveedor}'),
+                estado = 1  
             WHERE idProducto = {idProducto}"""
     
     try:

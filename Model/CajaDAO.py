@@ -1,6 +1,36 @@
 from tkinter import messagebox
 from Conexion.Conexion import conexionBD
 
+def eliminarCaja(idCaja):
+    conexion = conexionBD()
+    if conexion is None:
+        messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+        return
+    
+    sql = f"""
+            UPDATE caja
+            SET estado = 0
+            WHERE idCaja = {idCaja}
+            """
+    
+    try:
+        cursor = conexion.cursor()
+        cursor.execute(sql)
+        conexion.commit()
+        title = 'Eliminar Caja'
+        mensaje = 'Caja Eliminada Exitosamente'
+        messagebox.showinfo(title, mensaje)
+    
+    except Exception as e:
+        title = 'Eliminar Caja'
+        mensaje = f'Error al Eliminar la Caja: {e}'
+        messagebox.showerror(title, mensaje)
+    
+    finally:
+        cursor.close()
+        conexion.close()
+
+
 def editarCaja(caja, idcaja, nombreUsuario):
     conexion = conexionBD()
     if conexion is None:
@@ -11,14 +41,15 @@ def editarCaja(caja, idcaja, nombreUsuario):
     montoFin = str(caja.montoFin).replace(',', '')
     
     sql = f"""
-            UPDATE caja SET 
-                horaInicio = '{caja.horaInicio}', 
-                horaFin = '{caja.horaFin}', 
-                montoApertura = {montoApertura}, 
-                montoFin = {montoFin},
-                estado = 1,
-                idUser = (SELECT idusuario FROM usuario WHERE correo = '{nombreUsuario}')
-            WHERE idProducto = {idcaja}
+            UPDATE caja AS c
+            INNER JOIN usuario AS u ON c.idUser = u.idusuario
+            SET c.horaInicio = '{caja.horaInicio}', 
+                c.horaFin = '{caja.horaFin}', 
+                c.montoApertura = {montoApertura}, 
+                c.montoFin = {montoFin},
+                c.estado = 1,
+                c.idUser = (SELECT idusuario FROM usuario WHERE correo = '{nombreUsuario}')
+            WHERE c.idcaja = {idcaja}
             """
     
     try:
@@ -26,7 +57,7 @@ def editarCaja(caja, idcaja, nombreUsuario):
         cursor.execute(sql)
         conexion.commit()
         title = 'Editar Caja'
-        mensaje = 'Caja Editado Exitosamente'
+        mensaje = 'Caja Editada Exitosamente'
         messagebox.showinfo(title, mensaje)
     
     except Exception as e:
@@ -37,6 +68,8 @@ def editarCaja(caja, idcaja, nombreUsuario):
     finally:
         cursor.close()
         conexion.close()
+
+
 
 def agregar(caja, nombreUsuario):
     conexion = conexionBD()
@@ -82,19 +115,20 @@ def listarCaja():
         cursor = conexion.cursor()
         cursor.execute("""SELECT c.idCaja, c.horaInicio, c.horaFin, c.montoApertura, c.montoFin, u.correo 
                        FROM caja c 
-                       JOIN usuario u on c.idcaja = u.idusuario
-                       WHERE c.estado = 1 """)  # Consulta para seleccionar todos los productos
-        productos = cursor.fetchall()  # Recupera todos los registros de la consulta
+                       JOIN usuario u on c.idUser = u.idusuario
+                       WHERE c.estado = 1 """)  # Corrección: relacionar caja con usuario correctamente
+        cajas = cursor.fetchall()  # Recupera todos los registros de la consulta
         
-        return productos
+        return cajas
 
     except Exception as e:
-        messagebox.showerror("Error", f"No se pudo listar los productos: {e}")
+        messagebox.showerror("Error", f"No se pudo listar las cajas: {e}")
         return []
 
     finally:
         cursor.close()
-        conexion.close
+        conexion.close()
+
     
 
 

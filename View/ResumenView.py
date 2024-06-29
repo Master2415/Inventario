@@ -119,7 +119,7 @@ class Frame_ResumenVentas(tk.Frame):
         fecha_inicio = self.fecha_inicio.get()
         fecha_fin = self.fecha_fin.get()
         if not fecha_inicio or not fecha_fin:
-            messagebox.showerror("Error", "Ambos campos de fecha son obligatorios.")
+            messagebox.showinfo("Error", "Ambos campos de fecha son obligatorios para generar la lista.")
             return
         try:
             datetime.strptime(fecha_inicio, '%Y-%m-%d')

@@ -73,3 +73,44 @@ def consulta_productos( fecha_inicio, fecha_fin):
         finally:
             cursor.close()
             conexion.close()
+
+def consulta_productos_compra(fecha_inicio, fecha_fin):
+        conexion = conexionBD()
+        if conexion is None:
+            messagebox.showerror("Error", "No se pudo conectar a la base de datos")
+            return []
+        
+        sql = f"""
+        SELECT 
+            ps.codigo,
+            ps.nombre, 
+            ps.tipo, 
+            ROUND(SUM(p.cantidadStock), 2) AS cantidad_comprada, 
+            ROUND(AVG(p.precio), 2) AS precio_promedio, 
+            ROUND(SUM(p.cantidadStock), 2) * ROUND(AVG(p.precio), 2) AS precio_total  
+        FROM 
+            producto p
+        JOIN 
+            productostock ps ON p.idProductoStock = ps.id
+        WHERE 
+            ps.estado = 1 AND
+            p.fechaIngreso BETWEEN '{fecha_inicio}' AND '{fecha_fin}'
+        GROUP BY 
+            ps.codigo, ps.nombre, ps.tipo
+        """
+        
+        try:
+            cursor = conexion.cursor()
+            cursor.execute(sql)
+            productos = cursor.fetchall()
+            return productos
+        except Exception as e:
+            messagebox.showerror("Error", f"No se pudo listar los productos: {e}")
+            return []
+        finally:
+            cursor.close()
+            conexion.close()
+
+
+
+    

@@ -67,7 +67,6 @@ class Frame_Resumen(tk.Frame):
         
         self.productos_treeview.heading(col, command=lambda: self.sort_treeview(col, not descending))
 
-
 class Frame_ResumenVentas(tk.Frame):
     def __init__(self, root, width=1745, height=750):
         super().__init__(root, width=width, height=height)
@@ -142,4 +141,87 @@ class Frame_ResumenVentas(tk.Frame):
         self.label_total_vendido.config(text=f"Total Vendido: ${total_vendido:,.2f}")
 
 
+class ListadoProductosCompra(tk.Frame):
+    def __init__(self, root, width=1745, height=750):
+        super().__init__(root, width=width, height=height)
+        self.root = root
+        self.config(bg='#f0f0f0')  # Establecer el color de fondo del frame principal
+        self.pack(fill='both', expand=True)
+        self.create_widgets()
+        self.listar_productos()
+
+    def create_widgets(self):
+        # Frame para el filtro de fechas
+        frame_filtros = tk.Frame(self)
+        frame_filtros.pack(fill='x', padx=10, pady=10)
+        
+        tk.Label(frame_filtros, text="Fecha Inicio:").pack(side='left')
+        self.fecha_inicio = tk.Entry(frame_filtros)
+        self.fecha_inicio.pack(side='left', padx=5)
+        
+        tk.Label(frame_filtros, text="Fecha Fin:").pack(side='left')
+        self.fecha_fin = tk.Entry(frame_filtros)
+        self.fecha_fin.pack(side='left', padx=5)
+        
+        btn_consultar = tk.Button(frame_filtros, text="Consultar", command=self.listar_productos)
+        btn_consultar.pack(side='left', padx=5)
+        
+        # Frame para la tabla
+        self.frame_tabla = tk.Frame(self)
+        self.frame_tabla.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        self.tabla = ttk.Treeview(self.frame_tabla, columns=('codigo', 'nombre', 'tipo', 'cantidad_comprada', 'precio_promedio', 'precio_total'))
+        self.tabla.pack(side='left', fill='both', expand=True)
+        
+        scrollbar = ttk.Scrollbar(self.frame_tabla, orient='vertical', command=self.tabla.yview)
+        scrollbar.pack(side='right', fill='y')
+        
+        self.tabla.configure(yscroll=scrollbar.set)
+        
+        self.tabla.heading('#0', text='Código')
+        self.tabla.heading('#1', text='Nombre')
+        self.tabla.heading('#2', text='Tipo')
+        self.tabla.heading('#3', text='Cantidad Comprada')
+        self.tabla.heading('#4', text='Precio Promedio')
+        self.tabla.heading('#5', text='Precio Total')
+        
+        self.tabla.column('#0', anchor='w', width=100)
+        self.tabla.column('#1', anchor='w', width=150)
+        self.tabla.column('#2', anchor='w', width=150)
+        self.tabla.column('#3', anchor='center', width=120)
+        self.tabla.column('#4', anchor='center', width=120)
+        self.tabla.column('#5', anchor='center', width=120)
+        
+        # Label para el total general
+        self.total_general_label = tk.Label(self, text="Total General: 0", font=("Arial", 14))
+        self.total_general_label.pack(pady=10)
     
+    def listar_productos(self):
+        fecha_inicio = self.fecha_inicio.get()
+        fecha_fin = self.fecha_fin.get()
+
+        if not fecha_inicio or not fecha_fin:
+            messagebox.showinfo("Error", "Ambos campos de fecha son obligatorios para generar la lista.")
+            return
+        try:
+            datetime.strptime(fecha_inicio, '%Y-%m-%d')
+            datetime.strptime(fecha_fin, '%Y-%m-%d')
+        except ValueError:
+            messagebox.showerror("Error", "Formato de fecha incorrecto. Use YYYY-MM-DD.")
+            return
+        
+        productos = consulta_productos_compra(fecha_inicio, fecha_fin)
+        
+        # Limpiar la tabla antes de actualizarla
+        for item in self.tabla.get_children():
+            self.tabla.delete(item)
+        
+        total_general = 0.0
+        for producto in productos:
+            cantidad_comprada = "{:,.2f}".format(producto[3])
+            precio_promedio = "{:,.2f}".format(producto[4])
+            precio_total = "{:,.2f}".format(producto[5])
+            self.tabla.insert('', 'end', text=producto[0], values=(producto[1], producto[2], cantidad_comprada, precio_promedio, precio_total))
+            total_general += producto[5]
+        
+        self.total_general_label.config(text=f"Total General: {total_general:,.2f}")

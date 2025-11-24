@@ -92,3 +92,18 @@ Para crear un archivo ejecutable portable para Windows, consulta la guía de ins
 
 
 *   **Autor**: [Douglas](https://github.com/Master2415)
+
+*   Imagenes del proyecto funcionando
+
+*   <img width="1918" height="727" alt="dashboard" src="https://github.com/user-attachments/assets/e852ef8c-7012-4601-84b3-9d70cee24ca3" />
+<img width="1918" height="922" alt="generarVenta" src="https://github.com/user-attachments/assets/12ce9b6d-38e3-49a3-a32b-552109d05e29" />
+<img width="1918" height="923" alt="inventario" src="https://github.com/user-attachments/assets/c4f78368-7adb-4d17-86f5-4224e8b3c5f3" />
+<img width="1918" height="1077" alt="login" src="https://github.com/user-attachments/assets/6c4a9722-7ea4-41b6-914e-d0916814017a" />
+<img width="1918" height="883" alt="productos" src="https://github.com/user-attachments/assets/4e6b0808-d986-4c85-b728-8c0f3004e918" />
+<img width="1918" height="1078" alt="reportes" src="https://github.com/user-attachments/assets/672150ad-5d62-486a-8adc-b2299e3ea44b" />
+<img width="1918" height="1078" alt="resumen_ventas" src="https://github.com/user-attachments/assets/407c6698-1433-4410-9adf-c40bce57d6a6" />
+<img width="1918" height="966" alt="venta_generada" src="https://github.com/user-attachments/assets/dc51f676-3166-4b6f-ab56-6f9853a2a69b" />
+<img width="1918" height="1078" alt="apertura_caja" src="https://github.com/user-attachments/assets/81b8f5e6-a0ea-42bc-8ae8-a8ba75f8b69d" />
+<img width="1918" height="821" alt="caja_abierta" src="https://github.com/user-attachments/assets/9f24eb15-0006-4926-9a89-39e56a24cae5" />
+<img width="1918" height="892" alt="cerrar_caja" src="https://github.com/user-attachments/assets/0a48cc73-ff3c-46b6-9480-b968cc2b70d8" />
+

@@ -91,6 +91,4 @@ Para crear un archivo ejecutable portable para Windows, consulta la guía de ins
 *   `build_exe.py`: Script para compilar el proyecto a .exe.
 
 
-## autor
-
-*   **Autor**: [Tu Douglas](https://github.com/Master2415)
+*   **Autor**: [Douglas](https://github.com/Master2415)
